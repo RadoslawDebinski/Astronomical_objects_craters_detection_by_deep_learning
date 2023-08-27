@@ -6,6 +6,9 @@ source_dataset_dir = "C:\\ACIR-WETI\\Praca_Inzynierska\\Input_data\\pdsimage2.wr
 split_craters_by_tile_dir = "C:\\ACIR-WETI\\Praca_Inzynierska\\Code_Section\\InputData"
 img_path = "A:\\Inz_data\\WAC_GLOBAL_E300N2250_100M.tif"
 
+scale = 100  # meters per pixel
+resolution = 303.23  # pixels per degree
+
 tiles_names = {
     "00-1-\d{6}": "WAC_GLOBAL_P900S0000_LAT_-90_to_-60_LON____0_to_360",
     "01-1-\d{6}": "WAC_GLOBAL_P900N0000_LAT__60_to__90_LON____0_to_360",
@@ -28,7 +31,7 @@ def source_dataset_module():
     sTS.analyze_split_crater_by_tile_id(cols_names_to_analyze)
 
 def images_module():
-    iMGA = ImgAnalyzer()
+    iMGA = ImgAnalyzer(scale, resolution)  # meters per pixel, pixels per degree
     iMGA.img_load_convert(img_path)
     iMGA.place_craters_centers("WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270.csv")
     iMGA.img_analyze(iMGA.rgb_img)
@@ -37,7 +40,7 @@ def images_module():
 
 if __name__ == '__main__':
     # Section of CSV dataset splitting and analysis
-    source_dataset_module()
+    # source_dataset_module()
 
     # Section of images loading, converting, processing and display
     images_module()
