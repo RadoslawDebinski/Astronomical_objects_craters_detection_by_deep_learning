@@ -2,6 +2,12 @@ import cv2
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
+import os
+
+
+MOON_CIRCUMFERENCE_KM = 10920
+SCALE_KM = 0.1
+
 
 class ImgAnalyzer:
     def __init__(self, scale, resolution):
@@ -9,6 +15,7 @@ class ImgAnalyzer:
         self.rgb_img = None
         self.scale = scale
         self.resolution = resolution
+        self.ellipse_counter = 0
 
     def img_load_convert(self, img_path):
         self.gray_img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
@@ -22,13 +29,14 @@ class ImgAnalyzer:
         print(f"Height: {height} px")
         print(f"Width: {width} px")
         print(f"No. channels: {channels}")
+        print(f"No. funny ellipses {self.ellipse_counter}")
         self._img_display()
 
     def _img_display(self):
         plt.imshow(self.rgb_img)
         plt.show()
 
-    def _mark_crater(self, longitude, latitude, radius_km):
+    def _mark_crater(self, longitude, latitude, radius_km, major_axis, minor_axis):
         # Convert longitude and latitude to pixel coordinates
         center_x = int((longitude - 180) * self.rgb_img.shape[1] / 90)
         center_y = int((60 - latitude) * self.rgb_img.shape[0] / 60)
@@ -44,57 +52,49 @@ class ImgAnalyzer:
 
         # Place a pixel at the specified coordinates
         self.rgb_img[center_y, center_x] = color
-        circle = self._mark_circle(center_x, center_y, radius_km)
 
-        for point in circle:
-            if 0 < point[0] < self.rgb_img.shape[0] and 0 < point[1] < self.rgb_img.shape[1]:
-                self.rgb_img[int(point[0]), int(point[1])] = color
+        # Draw circumference around center point
+        crater_circum_km = 2 * math.pi * radius_km
+        steps = int(crater_circum_km/SCALE_KM)
 
-    def _mark_circle(self, center_x, center_y, radius_km):
-        # Convert radius from meters to degrees
-        radius_m = 1000 * radius_km
-        radius_deg = radius_m / self.scale
+        for step in range(steps):
+            beta = 2 * math.pi * step / steps
+            r_x = radius_km * math.sin(beta)
+            r_y = radius_km * math.cos(beta)
+            gamma_x = r_x * 2 * math.pi / MOON_CIRCUMFERENCE_KM
+            gamma_y = r_y * 2 * math.pi / MOON_CIRCUMFERENCE_KM
+            pixel_x = int((longitude + gamma_x - 180) * self.rgb_img.shape[1] / 90)
+            pixel_y = int((60 - latitude - gamma_y) * self.rgb_img.shape[0] / 60)
+            # Place a pixel at the specified coordinates
+            try:
+                self.rgb_img[pixel_y, pixel_x] = color
+                self.rgb_img[pixel_y, pixel_x+1] = color
+                self.rgb_img[pixel_y, pixel_x-1] = color
+                self.rgb_img[pixel_y+1, pixel_x] = color
+                self.rgb_img[pixel_y-1, pixel_x] = color
+            except IndexError:
+                print("IndexError detected")
 
-        # Calculate the number of steps in longitude and latitude
-        # You can adjust the step size (smaller for higher precision)
-        step_size = 1 / self.resolution
-        longitude_steps = math.ceil(360 * radius_deg)
-        latitude_steps = math.ceil(180 * radius_deg)
 
-        # Fixed Value !!! Will be changed !!!
-        points_per_circle = 120  # number of points per circle
-        # Calculate angle between points
-        angle_step = 360 / points_per_circle
-        # List to store calculated points
-        points = []
-
-        # Iterate through longitude and latitude within the specified radius
-        for i in range(points_per_circle):
-            angle_rad = math.radians(i * angle_step)
-            x = center_x + radius_deg * math.cos(angle_rad) * self.resolution
-            y = center_y - radius_deg * math.sin(angle_rad) * self.resolution
-
-            # Convert pixel coordinates to longitude and latitude
-            longitude = (x / self.resolution) - 180
-            latitude = 90 - (y / self.resolution)
-
-            points.append((latitude, longitude))
-
-        return points
 
     def place_craters_centers(self, csv_dir):
         # Read the CSV file into a Pandas DataFrame
         df = pd.read_csv(csv_dir)
 
+        num_rows = df.shape[0]
+
         # Iterate through each row in the DataFrame
         for index, row in df.iterrows():
             # Access the second and third columns by their names
-            longitude = row['LON_CIRC_IMG']  # Replace 'Column2' with the actual column name
-            latitude = row['LAT_CIRC_IMG']  # Replace 'Column3' with the actual column name
-            radius = row['DIAM_CIRC_IMG'] / 2
+            longitude = row['LON_CIRC_IMG']
+            latitude = row['LAT_CIRC_IMG']
 
             if 180 < longitude < 270 and 0 < latitude < 60:
-                self._mark_crater(longitude, latitude, radius)
+                radius = row['DIAM_CIRC_IMG'] / 2
+                minor_axis = row['DIAM_ELLI_MINOR_IMG'] / 2
+                major_axis = row['DIAM_ELLI_MAJOR_IMG'] / 2
+                self._mark_crater(longitude, latitude, radius, major_axis, minor_axis)
+            print(f"Craters placing: {round(index/num_rows * 100, 3)}%")
 
     @staticmethod
     def save_image(output_path, image):
