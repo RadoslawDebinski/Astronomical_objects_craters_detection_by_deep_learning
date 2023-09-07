@@ -1,5 +1,6 @@
 from csv_sorter_module import SourceTypeSeparator
 from mask_module import MaskCreator
+from dataset_creation_module import DatasetCreator
 import re
 
 # Input and output CSV directories
@@ -25,6 +26,10 @@ COLS_NAMES_TO_ANALYZE = ["LAT_CIRC_IMG", "LON_CIRC_IMG", "LAT_ELLI_IMG", "LON_EL
 IMG_PATH = "C:\ACIR-WETI\Praca_Inzynierska\dataset_module_input\WAC_GLOBAL_E300N2250_100M.tif"
 SCALE_KM = 0.1  # kilometers per pixel
 RESOLUTION = 303.23  # pixels per degree
+# End dataset properties
+MIN_CROP_AREA_SIZE_KM = 50
+MAX_CROP_AREA_SIZE_KM = 100
+SAMPLE_RESOLUTION = (512, 512)
 
 
 # CSV dataset splitting and analysis module handling
@@ -44,9 +49,17 @@ def mask_module():
     iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
 
 
+def creation_module():
+    scale_px = 1 / SCALE_KM
+    dC = DatasetCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION, SCALE_KM)
+    key = CSV_TILES_KEYS[2]
+    dC.show_sample(IMG_PATH, f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+
+
 if __name__ == '__main__':
     # source_dataset_module()
-    mask_module()
+    # mask_module()
+    creation_module()
 
 
 
