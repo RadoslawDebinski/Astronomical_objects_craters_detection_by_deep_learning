@@ -1,49 +1,52 @@
-from csv_sorter import SourceTypeSeparator
-from img_module import ImgAnalyzer
+from csv_sorter_module import SourceTypeSeparator
+from mask_module import MaskCreator
 import re
 
-source_dataset_dir = "C:\\ACIR-WETI\\Praca_Inzynierska\\Input_data\\pdsimage2.wr.usgs.gov_Individual_Investigations_moon_lro.kaguya_multi_craterdatabase_robbins_2018_data_lunar_crater_database_robbins_2018.csv"
-split_craters_by_tile_dir = "C:\\ACIR-WETI\\Praca_Inzynierska\\Code_Section\\InputData"
-img_path = "A:\\Inz_data\\WAC_GLOBAL_E300N2250_100M.tif"
-
-scale = 100  # meters per pixel
-resolution = 303.23  # pixels per degree
-
-tiles_names = {
-    "00-1-\d{6}": "WAC_GLOBAL_P900S0000_LAT_-90_to_-60_LON____0_to_360",
-    "01-1-\d{6}": "WAC_GLOBAL_P900N0000_LAT__60_to__90_LON____0_to_360",
-    "02-1-\d{6}": "WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270",
-    "03-1-\d{6}": "WAC_GLOBAL_E300S2250_LAT_-60_to___0_LON__180_to_270",
-    "04-1-\d{6}": "WAC_GLOBAL_E300N3150_LAT___0_to__60_LON__270_to_360",
-    "05-1-\d{6}": "WAC_GLOBAL_E300S3150_LAT_-60_to__0__LON__270_to_360",
-    "06-1-\d{6}": "WAC_GLOBAL_E300N0450_LAT___0_to__60_LON_____0_to_90",
-    "07-1-\d{6}": "WAC_GLOBAL_E300S0450_LAT_-60_to__0__LON_____0_to_90",
-    "08-1-\d{6}": "WAC_GLOBAL_E300N1350_LAT___0_to__60_LON___90_to_180",
-    "09-1-\d{6}": "WAC_GLOBAL_E300S1350_LAT_-60_to___0_LON___90_to_180",
+# Input and output CSV directories
+SOURCE_DATASET_DIR = "C:\ACIR-WETI\Praca_Inzynierska\dataset_module_input\pdsimage2.wr.usgs.gov_Individual_Investigations_moon_lro.kaguya_multi_craterdatabase_robbins_2018_data_lunar_crater_database_robbins_2018.csv"
+TEMP_CRATERS_BY_TILE_DIR = "C:\\ACIR-WETI\\Praca_Inzynierska\\dataset_module_temporary"
+# Constants for proper CSV processing
+CSV_TILES_NAMES = {
+    "00-\d-\d{6}": "WAC_GLOBAL_P900S0000_LAT_-90_to_-60_LON____0_to_360",
+    "01-\d-\d{6}": "WAC_GLOBAL_P900N0000_LAT__60_to__90_LON____0_to_360",
+    "02-\d-\d{6}": "WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270",
+    "03-\d-\d{6}": "WAC_GLOBAL_E300S2250_LAT_-60_to___0_LON__180_to_270",
+    "04-\d-\d{6}": "WAC_GLOBAL_E300N3150_LAT___0_to__60_LON__270_to_360",
+    "05-\d-\d{6}": "WAC_GLOBAL_E300S3150_LAT_-60_to__0__LON__270_to_360",
+    "06-\d-\d{6}": "WAC_GLOBAL_E300N0450_LAT___0_to__60_LON_____0_to_90",
+    "07-\d-\d{6}": "WAC_GLOBAL_E300S0450_LAT_-60_to__0__LON_____0_to_90",
+    "08-\d-\d{6}": "WAC_GLOBAL_E300N1350_LAT___0_to__60_LON___90_to_180",
+    "09-\d-\d{6}": "WAC_GLOBAL_E300S1350_LAT_-60_to___0_LON___90_to_180",
 }
-first_col_id = "CRATER_ID"
-cols_names_to_analyze = ["LAT_CIRC_IMG", "LON_CIRC_IMG", "LAT_ELLI_IMG", "LON_ELLI_IMG"]
+CSV_TILES_KEYS = list(CSV_TILES_NAMES.keys())
+FIRST_COL_ID = "CRATER_ID"
+COLS_NAMES_TO_ANALYZE = ["LAT_CIRC_IMG", "LON_CIRC_IMG", "LAT_ELLI_IMG", "LON_ELLI_IMG"]
+# Temporary constants
+IMG_PATH = "C:\ACIR-WETI\Praca_Inzynierska\dataset_module_input\WAC_GLOBAL_E300N2250_100M.tif"
+SCALE_KM = 0.1  # kilometers per pixel
+RESOLUTION = 303.23  # pixels per degree
 
 
+# CSV dataset splitting and analysis module handling
 def source_dataset_module():
-    sTS = SourceTypeSeparator("00", source_dataset_dir, first_col_id, tiles_names, split_craters_by_tile_dir)
+    sTS = SourceTypeSeparator(SOURCE_DATASET_DIR, FIRST_COL_ID, CSV_TILES_NAMES, TEMP_CRATERS_BY_TILE_DIR)
     sTS.split_craters_by_tile_id()
-    sTS.analyze_split_crater_by_tile_id(cols_names_to_analyze)
+    # sTS.analyze_split_crater_by_tile_id(COLS_NAMES_TO_ANALYZE)
 
-def images_module():
-    iMGA = ImgAnalyzer(scale, resolution)  # meters per pixel, pixels per degree
-    iMGA.img_load_convert(img_path)
-    iMGA.place_craters_centers("WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270.csv")
-    iMGA.img_analyze(iMGA.rgb_img)
-    # iMGA.save_image("with_red_points_WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270.csv", iMGA.rgb_img)
+
+# Images loading, conversion, processing and mask creation module handling
+def mask_module():
+    iMGA = MaskCreator(SCALE_KM)  # meters per pixel, pixels per degree
+    iMGA.img_load(IMG_PATH)
+    iMGA.img_analyze()
+    key = CSV_TILES_KEYS[2]
+    iMGA.place_craters(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv")
+    iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
 
 
 if __name__ == '__main__':
-    # Section of CSV dataset splitting and analysis
     # source_dataset_module()
-
-    # Section of images loading, converting, processing and display
-    images_module()
+    mask_module()
 
 
 

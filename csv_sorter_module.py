@@ -2,12 +2,15 @@ import pandas as pd
 import re
 from prettytable import PrettyTable
 
+
 class SourceTypeSeparator:
-    def __init__(self, source_type, fundamental_dataset_dir, first_col_id, tiles_names, split_craters_by_tile_dir):
-        self.source_type = source_type
+    def __init__(self, fundamental_dataset_dir, first_col_id, tiles_names, split_craters_by_tile_dir):
+        # Where is CSV dataset:
         self.fundamental_data_dir = fundamental_dataset_dir
+        # Variables to proceed it properly
         self.first_col_id = first_col_id
         self.tiles_names = tiles_names
+        # Where to save to CSV files:
         self.split_craters_by_tile_dir = split_craters_by_tile_dir
 
     def split_craters_by_tile_id(self):
