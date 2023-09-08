@@ -3,6 +3,13 @@ from mask_module import MaskCreator
 from dataset_creation_module import DatasetCreator
 import re
 
+# TODO: Download other WAC tiles
+# TODO: Remade mask module to create mask files for all tiles
+# TODO: Make gitignore as it should be ;)
+# TODO: Remade this repo following PLUG & PLAY way
+# TODO: Make run_pipeline in dataset_creation_module
+# TODO: Test if dataset creator works
+
 # Input and output CSV directories
 SOURCE_DATASET_DIR = "C:\ACIR-WETI\Praca_Inzynierska\dataset_module_input\pdsimage2.wr.usgs.gov_Individual_Investigations_moon_lro.kaguya_multi_craterdatabase_robbins_2018_data_lunar_crater_database_robbins_2018.csv"
 TEMP_CRATERS_BY_TILE_DIR = "C:\\ACIR-WETI\\Praca_Inzynierska\\dataset_module_temporary"
@@ -22,7 +29,7 @@ CSV_TILES_NAMES = {
 CSV_TILES_KEYS = list(CSV_TILES_NAMES.keys())
 FIRST_COL_ID = "CRATER_ID"
 COLS_NAMES_TO_ANALYZE = ["LAT_CIRC_IMG", "LON_CIRC_IMG", "LAT_ELLI_IMG", "LON_ELLI_IMG"]
-# Temporary constants
+# WAC tiles images constants
 IMG_PATH = "C:\ACIR-WETI\Praca_Inzynierska\dataset_module_input\WAC_GLOBAL_E300N2250_100M.tif"
 SCALE_KM = 0.1  # kilometers per pixel
 RESOLUTION = 303.23  # pixels per degree
@@ -30,10 +37,15 @@ RESOLUTION = 303.23  # pixels per degree
 MIN_CROP_AREA_SIZE_KM = 50
 MAX_CROP_AREA_SIZE_KM = 100
 SAMPLE_RESOLUTION = (512, 512)
+# Moon constants
+MEAN_MOON_RADIUS_KM = 1737.05
+LONGITUDE_MOON_CIRCUMFERENCE_KM = 10907
+# Other constants
+CRATER_RIM_INTENSITY = 255
 
 
 # CSV dataset splitting and analysis module handling
-def source_dataset_module():
+def source_catalogue_module():
     sTS = SourceTypeSeparator(SOURCE_DATASET_DIR, FIRST_COL_ID, CSV_TILES_NAMES, TEMP_CRATERS_BY_TILE_DIR)
     sTS.split_craters_by_tile_id()
     # sTS.analyze_split_crater_by_tile_id(COLS_NAMES_TO_ANALYZE)
@@ -41,7 +53,7 @@ def source_dataset_module():
 
 # Images loading, conversion, processing and mask creation module handling
 def mask_module():
-    iMGA = MaskCreator(SCALE_KM)  # meters per pixel, pixels per degree
+    iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
     iMGA.img_load(IMG_PATH)
     iMGA.img_analyze()
     key = CSV_TILES_KEYS[2]
@@ -57,7 +69,7 @@ def creation_module():
 
 
 if __name__ == '__main__':
-    # source_dataset_module()
+    # source_catalogue_module()
     # mask_module()
     creation_module()
 

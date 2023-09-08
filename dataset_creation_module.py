@@ -13,8 +13,9 @@ class DatasetCreator:
         self.sample_resolution = sample_resolution
         self.scale_km = scale_km
 
+    # Rotation - for eventually further usage
     @staticmethod
-    def rotate_image(image, angle):
+    def _rotate_image(image, angle):
         # Get the dimensions of the image
         height, width = image.shape[:2]
 
@@ -28,6 +29,9 @@ class DatasetCreator:
         rotated_image = cv2.warpAffine(image, rotation_matrix, (width, height))
 
         return rotated_image
+
+    def run_pipeline(self):
+        pass
 
     def show_sample(self, image_path, mask_path):
         # Load source image and mask
@@ -53,8 +57,10 @@ class DatasetCreator:
             angle = random.randint(0, 359)
 
             # Crop the square region from the input image
-            cropped_input_image = self.rotate_image(input_image[y:y2, x:x2], angle)
-            cropped_mask_image = self.rotate_image(mask_image[y:y2, x:x2], angle)
+            # cropped_input_image = self._rotate_image(input_image[y:y2, x:x2], angle)
+            # cropped_mask_image = self._rotate_image(mask_image[y:y2, x:x2], angle)
+            cropped_input_image = input_image[y:y2, x:x2]
+            cropped_mask_image = mask_image[y:y2, x:x2]
 
             resized_input_image = cv2.resize(cropped_input_image, self.sample_resolution)
             resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)
@@ -64,7 +70,7 @@ class DatasetCreator:
 
             # Info for user
             edge_length_km = int(side_size * self.scale_km)
-            print(f'Presented area size is:{edge_length_km}x{edge_length_km}km')
+            print(f'Presented area size is: {edge_length_km}x{edge_length_km}km')
 
             # Display the combined image
             cv2.imshow('Combined Image', combined_image)

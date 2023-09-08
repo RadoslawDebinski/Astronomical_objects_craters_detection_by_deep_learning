@@ -4,19 +4,16 @@ import numpy as np
 import pandas as pd
 import math
 
-# !!!MOON CONSTANTS!!!
-MEAN_MOON_RADIUS_KM = 1737.05
-LONGITUDE_MOON_CIRCUMFERENCE_KM = 10907
-# Other variables
-RIM_INTENSITY = 255
-
 
 class MaskCreator:
-    def __init__(self, scale):
+    def __init__(self, scale, moon_radius_km, long_moon_circum_km, rim_intensity):
         self.gray_img = None
         self.rgb_img = None
         self.scale = scale
         self.mask_img = None
+        self.moon_radius_km = moon_radius_km
+        self.long_moon_circum_km = long_moon_circum_km
+        self.rim_intensity = rim_intensity
 
     def img_load(self, img_path):
         self.gray_img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
@@ -46,25 +43,26 @@ class MaskCreator:
         #     color = [0, 0, 0]
 
         # Place a pixel at the specified coordinates
-        self.mask_img[center_y, center_x] = RIM_INTENSITY
+        self.mask_img[center_y, center_x] = self.rim_intensity
 
         # Draw circumference around center point
         crater_circum_km = 2 * math.pi * radius_km
-        steps = int(crater_circum_km/self.scale)
+        steps = int(crater_circum_km / self.scale)
         radius_scaler = 1
 
         for step in range(steps):
             beta = 2 * math.pi * step / steps
             r_x = radius_scaler * radius_km * math.sin(beta)
             r_y = radius_scaler * radius_km * math.cos(beta)
-            latitude_moon_circumference_km = math.sin(math.pi / 2 - math.radians(latitude)) * 2 * math.pi * MEAN_MOON_RADIUS_KM
+            latitude_moon_circumference_km = math.sin(
+                math.pi / 2 - math.radians(latitude)) * 2 * math.pi * self.moon_radius_km
             gamma_x = math.degrees(r_x * 2 * math.pi / latitude_moon_circumference_km)
-            gamma_y = math.degrees(r_y * 2 * math.pi / LONGITUDE_MOON_CIRCUMFERENCE_KM)
+            gamma_y = math.degrees(r_y * 2 * math.pi / self.long_moon_circum_km)
             pixel_x = int((longitude + gamma_x - 180) * self.gray_img.shape[1] / 90)
             pixel_y = int((60 - latitude - gamma_y) * self.gray_img.shape[0] / 60)
             # Place a pixel at the specified coordinates
             with contextlib.suppress(IndexError):
-                self.mask_img[pixel_y, pixel_x] = RIM_INTENSITY
+                self.mask_img[pixel_y, pixel_x] = self.rim_intensity
 
     def place_craters(self, csv_dir):
         # Read the CSV file with dataset into a Pandas DataFrame
@@ -89,19 +87,15 @@ class MaskCreator:
             else:
                 rejected_craters_counter += 1
             # Update process status
-            if int(index/num_rows * 100) > process_counter:
-                process_counter = int(index/num_rows * 100)
+            if int(index / num_rows * 100) > process_counter:
+                process_counter = int(index / num_rows * 100)
                 print(f"Craters placing: {process_counter}%", end='\r')
         # Process finished display summary
         print("Craters placing 100%")
-        print(f"No. rejected craters: {rejected_craters_counter}, it's {rejected_craters_counter/num_rows}%")
+        print(f"No. rejected craters: {rejected_craters_counter}, it's {rejected_craters_counter / num_rows}%")
 
     def save_mask(self, output_path):
         if cv2.imwrite(output_path, self.mask_img):
             print("Image saved successfully.")
         else:
             print("Image not saved successfully!")
-
-
-
-
