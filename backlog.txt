@@ -1,0 +1,12 @@
+CSV_TILES_NAMES = {
+    "00-\d-\d{6}": "WAC_GLOBAL_P900S0000_LAT_-90_to_-60_LON____0_to_360",
+    "01-\d-\d{6}": "WAC_GLOBAL_P900N0000_LAT__60_to__90_LON____0_to_360",
+    "02-\d-\d{6}": "WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270",
+    "03-\d-\d{6}": "WAC_GLOBAL_E300S2250_LAT_-60_to___0_LON__180_to_270",
+    "04-\d-\d{6}": "WAC_GLOBAL_E300N3150_LAT___0_to__60_LON__270_to_360",
+    "05-\d-\d{6}": "WAC_GLOBAL_E300S3150_LAT_-60_to__0__LON__270_to_360",
+    "06-\d-\d{6}": "WAC_GLOBAL_E300N0450_LAT___0_to__60_LON_____0_to_90",
+    "07-\d-\d{6}": "WAC_GLOBAL_E300S0450_LAT_-60_to__0__LON_____0_to_90",
+    "08-\d-\d{6}": "WAC_GLOBAL_E300N1350_LAT___0_to__60_LON___90_to_180",
+    "09-\d-\d{6}": "WAC_GLOBAL_E300S1350_LAT_-60_to___0_LON___90_to_180",
+}

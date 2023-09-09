@@ -3,28 +3,29 @@ from mask_module import MaskCreator
 from dataset_creation_module import DatasetCreator
 import re
 
-# TODO: Download other WAC tiles
 # TODO: Remade mask module to create mask files for all tiles
 # TODO: Make gitignore as it should be ;)
 # TODO: Remade this repo following PLUG & PLAY way
 # TODO: Make run_pipeline in dataset_creation_module
 # TODO: Test if dataset creator works
 
-# Input and output CSV directories
-SOURCE_DATASET_DIR = "C:\ACIR-WETI\Praca_Inzynierska\dataset_module_input\pdsimage2.wr.usgs.gov_Individual_Investigations_moon_lro.kaguya_multi_craterdatabase_robbins_2018_data_lunar_crater_database_robbins_2018.csv"
-TEMP_CRATERS_BY_TILE_DIR = "C:\\ACIR-WETI\\Praca_Inzynierska\\dataset_module_temporary"
+# Input and temp directories / names
+INPUT_ZIP_PATH = "InputData.7z"
+CRATERS_CATALOGUE_NAME = "pdsimage2.wr.usgs.gov_Individual_Investigations_moon_lro" \
+                         ".kaguya_multi_craterdatabase_robbins_2018_data_lunar_crater_database_robbins_2018.csv"
+TEMP_CRATERS_BY_TILE_DIR = "tempData"
 # Constants for proper CSV processing
 CSV_TILES_NAMES = {
-    "00-\d-\d{6}": "WAC_GLOBAL_P900S0000_LAT_-90_to_-60_LON____0_to_360",
-    "01-\d-\d{6}": "WAC_GLOBAL_P900N0000_LAT__60_to__90_LON____0_to_360",
-    "02-\d-\d{6}": "WAC_GLOBAL_E300N2250_LAT___0_to__60_LON__180_to_270",
-    "03-\d-\d{6}": "WAC_GLOBAL_E300S2250_LAT_-60_to___0_LON__180_to_270",
-    "04-\d-\d{6}": "WAC_GLOBAL_E300N3150_LAT___0_to__60_LON__270_to_360",
-    "05-\d-\d{6}": "WAC_GLOBAL_E300S3150_LAT_-60_to__0__LON__270_to_360",
-    "06-\d-\d{6}": "WAC_GLOBAL_E300N0450_LAT___0_to__60_LON_____0_to_90",
-    "07-\d-\d{6}": "WAC_GLOBAL_E300S0450_LAT_-60_to__0__LON_____0_to_90",
-    "08-\d-\d{6}": "WAC_GLOBAL_E300N1350_LAT___0_to__60_LON___90_to_180",
-    "09-\d-\d{6}": "WAC_GLOBAL_E300S1350_LAT_-60_to___0_LON___90_to_180",
+    "00-\d-\d{6}": "WAC_GLOBAL_P900S0000_100M",
+    "01-\d-\d{6}": "WAC_GLOBAL_P900N0000_100M",
+    "02-\d-\d{6}": "WAC_GLOBAL_E300N2250_100M",
+    "03-\d-\d{6}": "WAC_GLOBAL_E300S2250_100M",
+    "04-\d-\d{6}": "WAC_GLOBAL_E300N3150_100M",
+    "05-\d-\d{6}": "WAC_GLOBAL_E300S3150_100M",
+    "06-\d-\d{6}": "WAC_GLOBAL_E300N0450_100M",
+    "07-\d-\d{6}": "WAC_GLOBAL_E300S0450_100M",
+    "08-\d-\d{6}": "WAC_GLOBAL_E300N1350_100M",
+    "09-\d-\d{6}": "WAC_GLOBAL_E300S1350_100M",
 }
 CSV_TILES_KEYS = list(CSV_TILES_NAMES.keys())
 FIRST_COL_ID = "CRATER_ID"
@@ -46,7 +47,7 @@ CRATER_RIM_INTENSITY = 255
 
 # CSV dataset splitting and analysis module handling
 def source_catalogue_module():
-    sTS = SourceTypeSeparator(SOURCE_DATASET_DIR, FIRST_COL_ID, CSV_TILES_NAMES, TEMP_CRATERS_BY_TILE_DIR)
+    sTS = SourceTypeSeparator(INPUT_ZIP_PATH, CRATERS_CATALOGUE_NAME, FIRST_COL_ID, CSV_TILES_NAMES, TEMP_CRATERS_BY_TILE_DIR)
     sTS.split_craters_by_tile_id()
     # sTS.analyze_split_crater_by_tile_id(COLS_NAMES_TO_ANALYZE)
 
@@ -69,9 +70,9 @@ def creation_module():
 
 
 if __name__ == '__main__':
-    # source_catalogue_module()
+    source_catalogue_module()
     # mask_module()
-    creation_module()
+    # creation_module()
 
 
 
