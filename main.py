@@ -5,9 +5,6 @@ import re
 import py7zr
 import os
 
-# TODO: Remade mask module to create mask files for all tiles
-# TODO: Make run_pipeline in dataset_creation_module
-# TODO: Test if dataset creator works
 
 # Input and temp directories / names
 INPUT_ZIP_PATH = "InputData.7z"
@@ -57,6 +54,26 @@ LONGITUDE_MOON_CIRCUMFERENCE_KM = 10907
 
 # Other constants
 CRATER_RIM_INTENSITY = 255
+
+
+def dir_module():
+    data_dir = os.path.join(os.getcwd(), INPUT_DATA_PATH)
+    # Check if the directory exists
+    if not os.path.exists(data_dir):
+        # If it doesn't exist, create it
+        os.makedirs(data_dir)
+        print(f"Directory '{data_dir}' created.")
+    else:
+        print(f"Directory '{data_dir}' already exists.")
+
+    temp_dir = os.path.join(os.getcwd(), TEMP_CRATERS_BY_TILE_DIR)
+    # Check if the directory exists
+    if not os.path.exists(temp_dir):
+        # If it doesn't exist, create it
+        os.makedirs(temp_dir)
+        print(f"Directory '{temp_dir}' created.")
+    else:
+        print(f"Directory '{temp_dir}' already exists.")
 
 
 # Load 7zip data
@@ -113,7 +130,8 @@ def creation_module():
 
 
 if __name__ == '__main__':
-    # open_zip_module()
-    # source_catalogue_module()
-    # mask_module()
+    dir_module()
+    open_zip_module()
+    source_catalogue_module()
+    mask_module()
     creation_module()
