@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import math
+import py7zr
 
 
 class MaskCreator:
@@ -15,8 +16,24 @@ class MaskCreator:
         self.long_moon_circum_km = long_moon_circum_km
         self.rim_intensity = rim_intensity
 
-    def img_load(self, img_path):
-        self.gray_img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    def img_load(self, input_zip, tile_name):
+        # Check if the image file exists in the 7z archive
+        if tile_name in input_zip.getnames():
+            print(f'Opening {tile_name}.')
+            # Read the TIF file from the 7z archive into bytes
+            file_data = input_zip.read(tile_name)
+
+            # Create np array object from the bytes data
+            file_data = file_data[tile_name]
+            nparr = np.frombuffer(file_data.read(), np.uint8)
+
+            # Decode the image using OpenCV
+            self.gray_img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+
+            # Now, 'self.gray_img' contains the image loaded from the 7z archive
+        else:
+            print(f"{tile_name} does not exist in the 7z archive.")
+
         # Initiate mask image with gray image's shape
         self.mask_img = np.zeros(np.shape(self.gray_img))
         # Convert grayscale to RGB
@@ -69,7 +86,7 @@ class MaskCreator:
         df = pd.read_csv(csv_dir)
         # Initiate process variables and communicates
         num_rows = df.shape[0]
-        print(f"Processing: \"{csv_dir}\" started.")
+        print(f"Processing craters from: \"{csv_dir}\" started.")
         process_counter = 0
         print(f"Craters placing: {process_counter}%", end='\r')
         rejected_craters_counter = 0
@@ -96,6 +113,6 @@ class MaskCreator:
 
     def save_mask(self, output_path):
         if cv2.imwrite(output_path, self.mask_img):
-            print("Image saved successfully.")
+            print("Mask saved successfully.")
         else:
-            print("Image not saved successfully!")
+            print("Mask not saved successfully!")

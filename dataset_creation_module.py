@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import math
 import random
+import py7zr
 
 
 class DatasetCreator:
@@ -25,17 +26,29 @@ class DatasetCreator:
         # Define the rotation matrix
         rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
 
-        # Apply the rotation to the image
-        rotated_image = cv2.warpAffine(image, rotation_matrix, (width, height))
-
-        return rotated_image
+        return cv2.warpAffine(image, rotation_matrix, (width, height))
 
     def run_pipeline(self):
         pass
 
-    def show_sample(self, image_path, mask_path):
-        # Load source image and mask
-        input_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    def show_sample(self, input_zip, tile_name, mask_path):
+        # Check if the image file exists in the 7z archive
+        if tile_name in input_zip.getnames():
+            # Read the TIF file from the 7z archive into bytes
+            file_data = input_zip.read(tile_name)
+
+            # Create a file-like object from the bytes data
+            file_data = file_data[tile_name]
+
+            nparr = np.frombuffer(file_data.read(), np.uint8)
+
+            # Decode the image using OpenCV
+            input_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+
+            # Now, 'self.gray_img' contains the image loaded from the 7z archive
+        else:
+            print(f"{image_file_name} does not exist in the 7z archive.")
+
         mask_image = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
         # Ensure same size of them
         if input_image.shape == mask_image.shape:
