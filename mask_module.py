@@ -16,24 +16,8 @@ class MaskCreator:
         self.long_moon_circum_km = long_moon_circum_km
         self.rim_intensity = rim_intensity
 
-    def img_load(self, input_zip, tile_name):
-        # Check if the image file exists in the 7z archive
-        if tile_name in input_zip.getnames():
-            print(f'Opening {tile_name}.')
-            # Read the TIF file from the 7z archive into bytes
-            file_data = input_zip.read(tile_name)
-
-            # Create np array object from the bytes data
-            file_data = file_data[tile_name]
-            nparr = np.frombuffer(file_data.read(), np.uint8)
-
-            # Decode the image using OpenCV
-            self.gray_img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-
-            # Now, 'self.gray_img' contains the image loaded from the 7z archive
-        else:
-            print(f"{tile_name} does not exist in the 7z archive.")
-
+    def img_load(self, file_path):
+        self.gray_img = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
         # Initiate mask image with gray image's shape
         self.mask_img = np.zeros(np.shape(self.gray_img))
         # Convert grayscale to RGB
@@ -45,19 +29,10 @@ class MaskCreator:
         print(f"Height: {height} px")
         print(f"Width: {width} px")
 
-    def _mark_crater_rim(self, longitude, latitude, radius_km):
+    def _mark_crater_rim(self, longitude, latitude, long_limit, lat_limit, radius_km):
         # Convert longitude and latitude to pixel coordinates
-        center_x = int((longitude - 180) * self.gray_img.shape[1] / 90)
-        center_y = int((60 - latitude) * self.gray_img.shape[0] / 60)
-
-        # if 1 <= radius_km < 5:
-        #     color = [0, 255, 0]
-        # elif 5 <= radius_km < 20:
-        #     color = [0, 0, 255]
-        # elif radius_km >= 20:
-        #     color = [255, 0, 0]
-        # else:
-        #     color = [0, 0, 0]
+        center_x = int((longitude - long_limit) * self.gray_img.shape[1] / 90)
+        center_y = int((lat_limit - latitude) * self.gray_img.shape[0] / 60)
 
         # Place a pixel at the specified coordinates
         self.mask_img[center_y, center_x] = self.rim_intensity
@@ -75,13 +50,13 @@ class MaskCreator:
                 math.pi / 2 - math.radians(latitude)) * 2 * math.pi * self.moon_radius_km
             gamma_x = math.degrees(r_x * 2 * math.pi / latitude_moon_circumference_km)
             gamma_y = math.degrees(r_y * 2 * math.pi / self.long_moon_circum_km)
-            pixel_x = int((longitude + gamma_x - 180) * self.gray_img.shape[1] / 90)
-            pixel_y = int((60 - latitude - gamma_y) * self.gray_img.shape[0] / 60)
+            pixel_x = int((longitude + gamma_x - long_limit) * self.gray_img.shape[1] / 90)
+            pixel_y = int((lat_limit - latitude - gamma_y) * self.gray_img.shape[0] / 60)
             # Place a pixel at the specified coordinates
             with contextlib.suppress(IndexError):
                 self.mask_img[pixel_y, pixel_x] = self.rim_intensity
 
-    def place_craters(self, csv_dir):
+    def place_craters(self, csv_dir, bounds):
         # Read the CSV file with dataset into a Pandas DataFrame
         df = pd.read_csv(csv_dir)
         # Initiate process variables and communicates
@@ -96,11 +71,9 @@ class MaskCreator:
             longitude = row['LON_CIRC_IMG']
             latitude = row['LAT_CIRC_IMG']
             # Check if crater center is in bounds
-            if 180 < longitude < 270 and 0 < latitude < 60:
+            if bounds[2] < longitude < bounds[3] and bounds[0] < latitude < bounds[1]:
                 radius = row['DIAM_CIRC_IMG'] / 2
-                # minor_axis = row['DIAM_ELLI_MINOR_IMG'] / 2
-                # major_axis = row['DIAM_ELLI_MAJOR_IMG'] / 2
-                self._mark_crater_rim(longitude, latitude, radius)
+                self._mark_crater_rim(longitude, latitude, bounds[2], bounds[1], radius)
             else:
                 rejected_craters_counter += 1
             # Update process status

@@ -31,24 +31,9 @@ class DatasetCreator:
     def run_pipeline(self):
         pass
 
-    def show_sample(self, input_zip, tile_name, mask_path):
-        # Check if the image file exists in the 7z archive
-        if tile_name in input_zip.getnames():
-            # Read the TIF file from the 7z archive into bytes
-            file_data = input_zip.read(tile_name)
-
-            # Create a file-like object from the bytes data
-            file_data = file_data[tile_name]
-
-            nparr = np.frombuffer(file_data.read(), np.uint8)
-
-            # Decode the image using OpenCV
-            input_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-
-            # Now, 'self.gray_img' contains the image loaded from the 7z archive
-        else:
-            print(f"{image_file_name} does not exist in the 7z archive.")
-
+    def show_sample(self, image_path, mask_path):
+        # Load source image and mask
+        input_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
         mask_image = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
         # Ensure same size of them
         if input_image.shape == mask_image.shape:
@@ -83,6 +68,7 @@ class DatasetCreator:
 
             # Info for user
             edge_length_km = int(side_size * self.scale_km)
+            print(f'Presented area cords are x from: {x}px to: {x2}px, y from: {y}px to: {y2}px')
             print(f'Presented area size is: {edge_length_km}x{edge_length_km}km')
 
             # Display the combined image

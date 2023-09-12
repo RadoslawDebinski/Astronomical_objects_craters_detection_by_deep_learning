@@ -32,14 +32,23 @@ CSV_TILES_KEYS = list(CSV_TILES_NAMES.keys())
 TILES_NAMES = [f'{name}.tif' for name in list(CSV_TILES_NAMES.values())]
 FIRST_COL_ID = "CRATER_ID"
 COLS_NAMES_TO_ANALYZE = ["LAT_CIRC_IMG", "LON_CIRC_IMG", "LAT_ELLI_IMG", "LON_ELLI_IMG"]
+# Bound for tiles with Equirectangular projection
+TILES_BOUNDS = [(0,  60, 180, 270),
+                (-60, 0, 180, 270),
+                (0,  60, 270, 360),
+                (-60, 0, 270, 360),
+                (0,  60, 0,    90),
+                (-60, 0, 0,    90),
+                (0,  60, 90,  180),
+                (-60, 0, 90,  180)]
 
 # WAC tiles images constants
 SCALE_KM = 0.1  # kilometers per pixel
 RESOLUTION = 303.23  # pixels per degree
 
 # End dataset properties
-MIN_CROP_AREA_SIZE_KM = 500
-MAX_CROP_AREA_SIZE_KM = 1000
+MIN_CROP_AREA_SIZE_KM = 50
+MAX_CROP_AREA_SIZE_KM = 100
 SAMPLE_RESOLUTION = (512, 512)
 
 # Moon constants
@@ -83,23 +92,28 @@ def source_catalogue_module():
 # Images loading, conversion, processing and mask creation module handling
 def mask_module():
     iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
+    # Iteration throw created CSV files ith rejection of polar images: P900S, P900N
     for index, tile in enumerate(TILES_NAMES[2:], start=2):
-        iMGA.img_load(load_zip_module(), tile)
+        iMGA.img_load(os.path.join(INPUT_DATA_PATH, tile))
         iMGA.img_analyze()
         key = CSV_TILES_KEYS[index]
-        iMGA.place_craters(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv")
+        iMGA.place_craters(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv", TILES_BOUNDS[index - 2])
         iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
 
 
 def creation_module():
     scale_px = 1 / SCALE_KM
-    dC = DatasetCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION, SCALE_KM)
-    key = CSV_TILES_KEYS[2]
-    dC.show_sample(load_zip_module(), TILES_NAMES[2], f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+    # Iteration throw created CSV files ith rejection of polar images: P900S, P900N
+    for index, tile in enumerate(TILES_NAMES[2:], start=2):
+        dC = DatasetCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
+                            SCALE_KM)
+        key = CSV_TILES_KEYS[index]
+        dC.show_sample(os.path.join(INPUT_DATA_PATH, tile),
+                       f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
 
 
 if __name__ == '__main__':
-    open_zip_module()
-    source_catalogue_module()
+    # open_zip_module()
+    # source_catalogue_module()
     # mask_module()
-    # creation_module()
+    creation_module()
