@@ -43,6 +43,7 @@ class MaskCreator:
         radius_scaler = 1
 
         for step in range(steps):
+            # Calculating pixels for rim with offset
             beta = 2 * math.pi * step / steps
             r_x = radius_scaler * radius_km * math.sin(beta)
             r_y = radius_scaler * radius_km * math.cos(beta)

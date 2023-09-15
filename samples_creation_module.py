@@ -7,7 +7,7 @@ import random
 import py7zr
 
 
-class DatasetCreator:
+class SampleCreator:
     def __init__(self, min_side_size_px, max_side_size_px, sample_resolution, scale_km):
         self.min_side_size_px = min_side_size_px
         self.max_side_size_px = max_side_size_px
@@ -28,7 +28,7 @@ class DatasetCreator:
 
         return cv2.warpAffine(image, rotation_matrix, (width, height))
 
-    def run_pipeline(self):
+    def make_sample(self):
         pass
 
     def show_sample(self, image_path, mask_path):
