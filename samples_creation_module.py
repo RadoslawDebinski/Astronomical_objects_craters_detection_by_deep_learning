@@ -8,11 +8,14 @@ import py7zr
 
 
 class SampleCreator:
-    def __init__(self, min_side_size_px, max_side_size_px, sample_resolution, scale_km):
+    def __init__(self, min_side_size_px, max_side_size_px, sample_resolution, scale_km, image_path, mask_path):
         self.min_side_size_px = min_side_size_px
         self.max_side_size_px = max_side_size_px
         self.sample_resolution = sample_resolution
         self.scale_km = scale_km
+        self.input_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+        self.mask_image = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+        self.image_height, self.image_width = self.input_image.shape[:2]
 
     # Rotation - for eventually further usage
     @staticmethod
@@ -28,20 +31,26 @@ class SampleCreator:
 
         return cv2.warpAffine(image, rotation_matrix, (width, height))
 
-    def make_sample(self):
-        pass
+    def make_sample(self, input_path, output_path):
+        # Define the range for random side size (min_side_size_px to max_side_size_px)
+        side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
+        # Generate random (x, y) coordinates for the top-left corner of the square
+        x = random.randint(0, self.image_width - side_size)
+        y = random.randint(0, self.image_height - side_size)
+        # Cropping, resizing and saving images
+        cv2.imwrite(input_path,  cv2.resize(self.input_image[y:y + side_size, x:x + side_size],
+                                            self.sample_resolution))
+        cv2.imwrite(output_path, cv2.resize(self.mask_image[y:y + side_size, x:x + side_size],
+                                            self.sample_resolution))
 
-    def show_sample(self, image_path, mask_path):
-        # Load source image and mask
-        input_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-        mask_image = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+    def show_sample(self):
         # Ensure same size of them
-        if input_image.shape == mask_image.shape:
+        if self.input_image.shape == self.mask_image.shape:
             # Define the range for random side size (min_side_size_px to max_side_size_px)
             side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
 
             # Get the dimensions of the input image
-            image_height, image_width = input_image.shape[:2]
+            image_height, image_width = self.input_image.shape[:2]
 
             # Generate random (x, y) coordinates for the top-left corner of the square
             x = random.randint(0, image_width - side_size)
@@ -51,14 +60,8 @@ class SampleCreator:
             x2 = x + side_size
             y2 = y + side_size
 
-            # Generate a random angle between -45 and 45 degrees (adjust as needed)
-            angle = random.randint(0, 359)
-
-            # Crop the square region from the input image
-            # cropped_input_image = self._rotate_image(input_image[y:y2, x:x2], angle)
-            # cropped_mask_image = self._rotate_image(mask_image[y:y2, x:x2], angle)
-            cropped_input_image = input_image[y:y2, x:x2]
-            cropped_mask_image = mask_image[y:y2, x:x2]
+            cropped_input_image = self.input_image[y:y2, x:x2]
+            cropped_mask_image = self.mask_image[y:y2, x:x2]
 
             resized_input_image = cv2.resize(cropped_input_image, self.sample_resolution)
             resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)

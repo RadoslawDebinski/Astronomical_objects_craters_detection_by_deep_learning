@@ -1,3 +1,4 @@
+import time
 import torch
 from torchvision import transforms
 from torch.utils.data import Dataset
@@ -33,7 +34,12 @@ class ImageAnnotationDataset(Dataset):
     def create_dataset(no_samples):
         # Check if working dirs exists, if not create it
         dir_module()
+        start_time = time.time()
         creation_module(no_samples)
+        end_time = time.time()
+        execution_time = end_time - start_time
+
+        print(f"Execution time: {execution_time} seconds")
 
     def load_dataset(self):
         return _, _
@@ -56,4 +62,5 @@ class ImageAnnotationDataset(Dataset):
 
 
 if __name__ == "__main__":
-    ImageAnnotationDataset.create_dataset(2)
+    # ImageAnnotationDataset.create_metadata()
+    ImageAnnotationDataset.create_dataset(1000)

@@ -118,15 +118,25 @@ def creation_module(no_samples):
     scale_px = 1 / SCALE_KM
     # How many samples create per tile
     no_samples_per_tile = int(no_samples / len(TILES_NAMES[2:]))
-    # Feeding Sample creator with parameters
-    sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
-                       SCALE_KM)
-    # Iteration throw created CSV files with rejection of polar images: P900S, P900N
+    # Iteration through created CSV files with rejection of polar images: P900S, P900N
     for index, tile in enumerate(TILES_NAMES[2:], start=2):
         key = CSV_TILES_KEYS[index]
         # Create base name for sample
-        sC.show_sample(os.path.join(INPUT_DATA_PATH, tile),
-                       f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+        file_name = "0" * len(str(no_samples_per_tile))
+        # Feeding Sample creator with parameters
+        sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
+                           SCALE_KM, os.path.join(INPUT_DATA_PATH, tile),
+                           f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+        # Create file names
+        file_names = [
+            f"{index - 1}_{str(int(file_name) + i).zfill(len(file_name))}"
+            for i in range(no_samples_per_tile)
+        ]
+
+        # Define a lambda function to create samples
+        for name in file_names:
+            sC.make_sample(f"{INPUT_IMAGES}\\{name}.jpg", f"{OUTPUT_IMAGES}\\{name}.jpg")
+
 
 
 def example_module():
@@ -134,8 +144,10 @@ def example_module():
     # Feeding Sample creator with parameters
     sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
                        SCALE_KM)
-    # Iteration throw created CSV files with rejection of polar images: P900S, P900N
+    # Iteration through created CSV files with rejection of polar images: P900S, P900N
     for index, tile in enumerate(TILES_NAMES[2:], start=2):
         key = CSV_TILES_KEYS[index]
-        sC.show_sample(os.path.join(INPUT_DATA_PATH, tile),
-                       f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+        sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
+                           SCALE_KM, os.path.join(INPUT_DATA_PATH, tile),
+                           f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+        sC.show_sample()
