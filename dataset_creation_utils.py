@@ -108,7 +108,7 @@ def mask_module():
     # Iteration throw created CSV files with rejection of polar images: P900S, P900N
     for index, tile in enumerate(TILES_NAMES[2:], start=2):
         iMGA.img_load(os.path.join(INPUT_DATA_PATH, tile))
-        iMGA.img_analyze()
+        # iMGA.img_analyze()
         key = CSV_TILES_KEYS[index]
         iMGA.place_craters(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv", TILES_BOUNDS[index - 2])
         iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
@@ -120,6 +120,8 @@ def creation_module(no_samples):
     no_samples_per_tile = int(no_samples / len(TILES_NAMES[2:]))
     # Iteration through created CSV files with rejection of polar images: P900S, P900N
     for index, tile in enumerate(TILES_NAMES[2:], start=2):
+        # Info which tile is during processing
+        print(f"Processing {index - 1} tile: {tile}")
         key = CSV_TILES_KEYS[index]
         # Create base name for sample
         file_name = "0" * len(str(no_samples_per_tile))
@@ -136,6 +138,7 @@ def creation_module(no_samples):
         # Define a lambda function to create samples
         for name in file_names:
             sC.make_sample(f"{INPUT_IMAGES}\\{name}.jpg", f"{OUTPUT_IMAGES}\\{name}.jpg")
+        print(f"{no_samples_per_tile} samples created")
 
 
 

@@ -1,66 +1,15 @@
 import time
 import torch
 from torchvision import transforms
-from torch.utils.data import Dataset
-from dataset_creator import *
+from image_annotation_dataset import ImageAnnotationDataset
 
-# TO DO: Create simple sample creator in creation_module
-# create in proper way load_dataset below
-
-
-class ImageAnnotationDataset(Dataset):
-    def __init__(self, input_root_dir, annotation_root_dir, transform=None):
-        self.input_root_dir = input_root_dir
-        self.annotation_root_dir = annotation_root_dir
-        self.transform = transform
-        self.input_image_paths, self.annotation_image_paths = self.load_dataset()
-
-    @staticmethod
-    def create_metadata():
-        # Check if working dirs exists, if not create it
-        dir_module()
-        # Unpack 7zip to directories
-        open_zip_module()
-        # Split source catalog for data corresponding to each tile
-        source_catalogue_module()
-        # Create masks for each tile
-        mask_module()
-
-    @staticmethod
-    def show_example_dataset():
-        example_module()
-
-    @staticmethod
-    def create_dataset(no_samples):
-        # Check if working dirs exists, if not create it
-        dir_module()
-        start_time = time.time()
-        creation_module(no_samples)
-        end_time = time.time()
-        execution_time = end_time - start_time
-
-        print(f"Execution time: {execution_time} seconds")
-
-    def load_dataset(self):
-        return _, _
-
-    def __len__(self):
-        return len(self.input_image_paths)
-
-    def __getitem__(self, idx):
-        input_image_path = self.input_image_paths[idx]
-        annotation_image_path = self.annotation_image_paths[idx]
-
-        input_image = Image.open(input_image_path).convert("RGB")
-        annotation_image = Image.open(annotation_image_path).convert("RGB")
-
-        if self.transform:
-            input_image = self.transform(input_image)
-            annotation_image = self.transform(annotation_image)
-
-        return input_image, annotation_image
+# Dataset paths
+DATASET_ROOT = "DatasetRoot"
+INPUT_IMAGES = f"{DATASET_ROOT}\\InputImages"
+OUTPUT_IMAGES = f"{DATASET_ROOT}\\OutputImages"
 
 
 if __name__ == "__main__":
-    # ImageAnnotationDataset.create_metadata()
-    ImageAnnotationDataset.create_dataset(1000)
+    iA = ImageAnnotationDataset(INPUT_IMAGES, OUTPUT_IMAGES)
+    input_d, output_d = iA.load_dataset()
+    print("stop")
