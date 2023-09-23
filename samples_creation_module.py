@@ -87,9 +87,9 @@ class SampleCreator:
         cell_shape = (750, 500)
 
         # Zooms cords and dimensions N0450
-        first_left_corner = (1300, 16000)
-        second_left_corner = (16000, 18000)
-        zoom_dims = (1950, 1300)
+        # first_left_corner = (1300, 16000)
+        # second_left_corner = (16000, 18000)
+        # zoom_dims = (1950, 1300)
         # Zooms cords and dimensions N2250
         first_left_corner = (0, 3800)
         second_left_corner = (12000, 8300)
@@ -203,7 +203,7 @@ class SampleCreator:
         second_mask = cv2.cvtColor(second_mask, cv2.COLOR_GRAY2BGR)
         # Expand rims at second mask
         # Define the neighborhood size (adjust as needed)
-        neighborhood_size = 5
+        neighborhood_size = 7
         # Create a kernel for dilation
         kernel = np.ones((neighborhood_size, neighborhood_size), np.uint8)
         # Dilate the white areas in second_mask

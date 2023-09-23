@@ -30,32 +30,33 @@ class MaskCreator:
         print(f"Width: {width} px")
 
     def _mark_crater_rim(self, longitude, latitude, long_limit, lat_limit, radius_km):
-        # Convert longitude and latitude to pixel coordinates
-        center_x = int((longitude - long_limit) * self.gray_img.shape[1] / 90)
-        center_y = int((lat_limit - latitude) * self.gray_img.shape[0] / 60)
+        if radius_km > 0:
+            # Convert longitude and latitude to pixel coordinates
+            center_x = int((longitude - long_limit) * self.gray_img.shape[1] / 90)
+            center_y = int((lat_limit - latitude) * self.gray_img.shape[0] / 60)
 
-        # Place a pixel at the specified coordinates
-        self.mask_img[center_y, center_x] = self.rim_intensity
+            # # Place a pixel at the specified coordinates
+            # self.mask_img[center_y, center_x] = self.rim_intensity
 
-        # Draw circumference around center point
-        crater_circum_km = 2 * math.pi * radius_km
-        steps = int(crater_circum_km / self.scale)
-        radius_scaler = 1
+            # Draw circumference around center point
+            crater_circum_km = 2 * math.pi * radius_km
+            steps = int(crater_circum_km / self.scale)
+            radius_scaler = 1
 
-        for step in range(steps):
-            # Calculating pixels for rim with offset
-            beta = 2 * math.pi * step / steps
-            r_x = radius_scaler * radius_km * math.sin(beta)
-            r_y = radius_scaler * radius_km * math.cos(beta)
-            latitude_moon_circumference_km = math.sin(
-                math.pi / 2 - math.radians(latitude)) * 2 * math.pi * self.moon_radius_km
-            gamma_x = math.degrees(r_x * 2 * math.pi / latitude_moon_circumference_km)
-            gamma_y = math.degrees(r_y * 2 * math.pi / self.long_moon_circum_km)
-            pixel_x = int((longitude + gamma_x - long_limit) * self.gray_img.shape[1] / 90)
-            pixel_y = int((lat_limit - latitude - gamma_y) * self.gray_img.shape[0] / 60)
-            # Place a pixel at the specified coordinates
-            with contextlib.suppress(IndexError):
-                self.mask_img[pixel_y, pixel_x] = self.rim_intensity
+            for step in range(steps):
+                # Calculating pixels for rim with offset
+                beta = 2 * math.pi * step / steps
+                r_x = radius_scaler * radius_km * math.sin(beta)
+                r_y = radius_scaler * radius_km * math.cos(beta)
+                latitude_moon_circumference_km = math.sin(
+                    math.pi / 2 - math.radians(latitude)) * 2 * math.pi * self.moon_radius_km
+                gamma_x = math.degrees(r_x * 2 * math.pi / latitude_moon_circumference_km)
+                gamma_y = math.degrees(r_y * 2 * math.pi / self.long_moon_circum_km)
+                pixel_x = int((longitude + gamma_x - long_limit) * self.gray_img.shape[1] / 90)
+                pixel_y = int((lat_limit - latitude - gamma_y) * self.gray_img.shape[0] / 60)
+                # Place a pixel at the specified coordinates
+                with contextlib.suppress(IndexError):
+                    self.mask_img[pixel_y, pixel_x] = self.rim_intensity
 
     def place_craters(self, csv_dir, bounds):
         # Read the CSV file with dataset into a Pandas DataFrame
@@ -93,10 +94,10 @@ class MaskCreator:
 
         if radius_km > 0:
             radius_px = int(radius_km * 10)  # 100m = 1px, so 1km = 10px
-            # Place a pixel at the specified coordinates
-            self.mask_img[center_y, center_x] = self.rim_intensity
+            # # Place a pixel at the specified coordinates
+            # self.mask_img[center_y, center_x] = self.rim_intensity
             # Create circle rim
-            cv2.circle(self.mask_img, (center_x, center_y), radius_px, 255, 8)
+            cv2.circle(self.mask_img, (center_x, center_y), radius_px, 255, 9)
 
     # Marking craters centers with distortions
     def place_craters_dis(self, csv_dir, bounds):

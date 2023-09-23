@@ -31,7 +31,7 @@ class ImageAnnotationDataset(Dataset):
         mask_module()
 
     @staticmethod
-    def show_example_dataset():
+    def show_examples():
         examples_module()
 
     @staticmethod
