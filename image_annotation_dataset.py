@@ -7,6 +7,9 @@ from dataset_creation_utils import *
 
 class ImageAnnotationDataset(Dataset):
     def __init__(self, input_root_dir, annotation_root_dir, transform=None):
+        # Check if working dirs exists, if not create it
+        print("\nCHECKING DIRECTORIES:\n")
+        dir_module()
         self.input_root_dir = input_root_dir
         self.annotation_root_dir = annotation_root_dir
         self.transform = transform
@@ -29,7 +32,7 @@ class ImageAnnotationDataset(Dataset):
 
     @staticmethod
     def show_example_dataset():
-        example_module()
+        examples_module()
 
     @staticmethod
     def create_dataset(no_samples):

@@ -12,4 +12,4 @@ OUTPUT_IMAGES = f"{DATASET_ROOT}\\OutputImages"
 if __name__ == "__main__":
     iA = ImageAnnotationDataset(INPUT_IMAGES, OUTPUT_IMAGES)
     input_d, output_d = iA.load_dataset()
-    print("stop")
+    iA.show_example_dataset()
