@@ -49,7 +49,7 @@ RESOLUTION = 303.23  # pixels per degree
 # End dataset properties
 MIN_CROP_AREA_SIZE_KM = 50
 MAX_CROP_AREA_SIZE_KM = 100
-SAMPLE_RESOLUTION = (512, 512)
+SAMPLE_RESOLUTION = (256, 256)
 
 # Moon constants
 MEAN_MOON_RADIUS_KM = 1737.05

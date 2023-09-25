@@ -3,6 +3,7 @@ import torch
 from torchvision import transforms
 from torch.utils.data import Dataset
 from dataset_creation_utils import *
+from PIL import Image
 
 
 class ImageAnnotationDataset(Dataset):
@@ -48,7 +49,12 @@ class ImageAnnotationDataset(Dataset):
         print(f"Dataset creator execution time: {execution_time} seconds")
 
     def load_dataset(self):
-        return sorted(os.listdir(self.input_root_dir)), sorted(os.listdir(self.annotation_root_dir))
+        input_files = sorted(os.listdir(self.input_root_dir))
+        input_files = [os.path.join(self.input_root_dir, file) for file in input_files]
+
+        annotation_files = sorted(os.listdir(self.annotation_root_dir))
+        annotation_files = [os.path.join(self.annotation_root_dir, file) for file in annotation_files]
+        return input_files, annotation_files
 
     def __len__(self):
         return len(self.input_image_paths)
