@@ -44,40 +44,38 @@ class SampleCreator:
                                             self.sample_resolution))
 
     def show_random_samples(self):
-        # Ensure same size of them
-        if self.input_image.shape == self.mask_image.shape:
-            # Define the range for random side size (min_side_size_px to max_side_size_px)
-            side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
+        # Define the range for random side size (min_side_size_px to max_side_size_px)
+        side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
 
-            # Get the dimensions of the input image
-            image_height, image_width = self.input_image.shape[:2]
+        # Get the dimensions of the input image
+        image_height, image_width = self.input_image.shape[:2]
 
-            # Generate random (x, y) coordinates for the top-left corner of the square
-            x = random.randint(0, image_width - side_size)
-            y = random.randint(0, image_height - side_size)
+        # Generate random (x, y) coordinates for the top-left corner of the square
+        x = random.randint(0, image_width - side_size)
+        y = random.randint(0, image_height - side_size)
 
-            # Calculate the bottom-right corner of the square
-            x2 = x + side_size
-            y2 = y + side_size
+        # Calculate the bottom-right corner of the square
+        x2 = x + side_size
+        y2 = y + side_size
 
-            cropped_input_image = self.input_image[y:y2, x:x2]
-            cropped_mask_image = self.mask_image[y:y2, x:x2]
+        cropped_input_image = self.input_image[y:y2, x:x2]
+        cropped_mask_image = self.mask_image[y:y2, x:x2]
 
-            resized_input_image = cv2.resize(cropped_input_image, self.sample_resolution)
-            resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)
+        resized_input_image = cv2.resize(cropped_input_image, self.sample_resolution)
+        resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)
 
-            # Concatenate the images vertically along their shared edge
-            combined_image = cv2.hconcat([resized_input_image, resized_mask_image])
+        # Concatenate the images vertically along their shared edge
+        combined_image = cv2.hconcat([resized_input_image, resized_mask_image])
 
-            # Info for user
-            edge_length_km = int(side_size * self.scale_km)
-            print(f'Presented area cords are x from: {x}px to: {x2}px, y from: {y}px to: {y2}px')
-            print(f'Presented area size is: {edge_length_km}x{edge_length_km}km')
+        # Info for user
+        edge_length_km = int(side_size * self.scale_km)
+        print(f'Presented area cords are x from: {x}px to: {x2}px, y from: {y}px to: {y2}px')
+        print(f'Presented area size is: {edge_length_km}x{edge_length_km}km')
 
-            # Display the combined image
-            cv2.imshow('Combined Image', combined_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+        # Display the combined image
+        cv2.imshow('Combined Image', combined_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
     def show_distortions_example(self, output_path):
         # sourcery skip: extract-duplicate-method, move-assign-in-block
@@ -232,9 +230,43 @@ class SampleCreator:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    def show_compression_comp(self, output_path):
+        # Define edge lengths for areas to compare
+        edge_length_km = [50, 100, 150, 200]
+        sides_sizes = [int(edge / self.scale_km) for edge in edge_length_km]
 
+        # Define offset between images
+        offset = 20
+        # Initialize combined image with white bar (upper row)
+        combined_masks = np.full((self.sample_resolution[0], offset, 3), [255, 255, 255]).astype(np.uint8)
+        # Initialize combined crop with white bar (lower row)
+        combined_crops = np.full((self.sample_resolution[0], offset, 3), [255, 255, 255]).astype(np.uint8)
 
-
+        for side_size in sides_sizes:
+            # Crop mask image and resize it
+            cropped_mask_image = self.mask_image[0:side_size, 0:side_size]
+            resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)
+            # Crop from resized mask area of first crop
+            new_edge = int(sides_sizes[0] * self.sample_resolution[0] / side_size)
+            cropped_cropped_mask = resized_mask_image[0:new_edge, 0:new_edge]
+            resized_cropped_mask = cv2.resize(cropped_cropped_mask, self.sample_resolution)
+            # Convert mask image and cropped mask to BGR
+            resized_mask_image = cv2.cvtColor(resized_mask_image, cv2.COLOR_GRAY2BGR)
+            resized_cropped_mask = cv2.cvtColor(resized_cropped_mask, cv2.COLOR_GRAY2BGR)
+            # Concatenate the images vertically along their shared edge. Previous concat + new image + white bar
+            combined_masks = cv2.hconcat([combined_masks.astype(np.uint8), resized_mask_image.astype(np.uint8),
+                                          np.full((self.sample_resolution[0], offset, 3),
+                                                  [255, 255, 255]).astype(np.uint8)])
+            combined_crops = cv2.hconcat([combined_crops.astype(np.uint8), resized_cropped_mask.astype(np.uint8),
+                                          np.full((self.sample_resolution[0], offset, 3),
+                                                  [255, 255, 255]).astype(np.uint8)])
+        # Combine cropped masks and resided areas with vertical white bar
+        combined_example = cv2.vconcat([combined_masks, np.full((offset, combined_masks.shape[1], 3),
+                                                                [255, 255, 255]).astype(np.uint8), combined_crops])
+        cv2.imwrite(output_path, combined_example)
+        cv2.imshow('Combined Image', combined_example)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 
