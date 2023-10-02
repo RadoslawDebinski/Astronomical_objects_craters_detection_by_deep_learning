@@ -31,7 +31,7 @@ SAVE_MODEL_ITER_NUM = 50
 def train_ResidualUNet():
     model = ResidualUNet(n_channels=N_CHANNELS, n_classes=N_CLASSES)
 
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.BCEWithLogitsLoss()  # BCELoss?
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=SCHEDULER_STEP_SIZE, gamma=SCHEDULER_GAMMA)
 

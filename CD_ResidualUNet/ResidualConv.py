@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 
@@ -20,7 +21,7 @@ class ResidualConv(nn.Module):
         x = self.relu1(x)
         x = self.conv2(x)
 
-        x += input_x
+        x = torch.add(x, input_x)
 
         x = self.bn2(x)
         x = self.relu2(x)
