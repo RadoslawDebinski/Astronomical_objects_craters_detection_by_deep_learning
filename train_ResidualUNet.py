@@ -23,7 +23,7 @@ N_CLASSES = 1
 LEARNING_RATE = 0.0001
 SCHEDULER_STEP_SIZE = 2
 SCHEDULER_GAMMA = 0.1
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 BIN_THRESHOLD = 0.5
 SAVE_MODEL_ITER_NUM = 50
 
@@ -42,9 +42,17 @@ def train_ResidualUNet():
     best_loss = np.inf
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    gpu_name = torch.cuda.get_device_name(0)
+    print(f"GPU 0 Name: {gpu_name}")
+
+    # Before starting your training loop
+    torch.cuda.empty_cache()
+
     model = model.to(device)
     num_epochs = NUM_EPOCHS
     for epoch in range(num_epochs):
+        torch.cuda.empty_cache()
         epoch_loss = 0
         epoch_accuracy = 0
         epoch_precision = 0
@@ -52,6 +60,7 @@ def train_ResidualUNet():
         epoch_f1_score = 0
 
         for idx, (images, masks) in enumerate(train_loader):
+            torch.cuda.empty_cache()
             images = images.to(device)
             masks = masks.to(device)
             optimizer.zero_grad()

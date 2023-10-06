@@ -30,14 +30,7 @@ class MaskCreator:
         print(f"Width: {width} px")
 
     def _mark_crater_rim(self, longitude, latitude, long_limit, lat_limit, radius_km):
-        if radius_km > 0:
-            # Convert longitude and latitude to pixel coordinates
-            center_x = int((longitude - long_limit) * self.gray_img.shape[1] / 90)
-            center_y = int((lat_limit - latitude) * self.gray_img.shape[0] / 60)
-
-            # # Place a pixel at the specified coordinates
-            # self.mask_img[center_y, center_x] = self.rim_intensity
-
+        if radius_km > 1.5:
             # Draw circumference around center point
             crater_circum_km = 2 * math.pi * radius_km
             steps = int(crater_circum_km / self.scale)
@@ -82,6 +75,14 @@ class MaskCreator:
             if int(index / num_rows * 100) > process_counter:
                 process_counter = int(index / num_rows * 100)
                 print(f"Craters placing: {process_counter}%", end='\r')
+
+        # Define the neighborhood size (adjust as needed)
+        neighborhood_size = 5
+        # Create a kernel for dilation
+        kernel = np.ones((neighborhood_size, neighborhood_size), np.uint8)
+        # Dilate the white areas in second_mask
+        self.mask_img = cv2.dilate(self.mask_img, kernel, iterations=1)
+
         # Process finished display summary
         print("Craters placing 100%")
         print(f"No. rejected craters: {rejected_craters_counter}, it's {rejected_craters_counter / num_rows}%")

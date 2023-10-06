@@ -36,6 +36,6 @@ def check_ResidualUNet(model_name, input_image, expected_output_mask):
 
 
 if __name__ == "__main__":
-    check_ResidualUNet('Model/model_epoch_0.pth',
-                       './DatasetRoot/InputImages/1_0000.jpg',
-                       './DatasetRoot/OutputImages/1_0000.jpg')
+    check_ResidualUNet('Model/model_net_last.pth',
+                       './DatasetRoot/InputImages/1_0002.jpg',
+                       './DatasetRoot/OutputImages/1_0002.jpg')

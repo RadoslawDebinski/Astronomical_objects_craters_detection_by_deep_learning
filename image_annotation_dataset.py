@@ -26,7 +26,7 @@ class ImageAnnotationDataset(Dataset):
         # open_zip_module()
         # Split source catalog for data corresponding to each tile
         print("\nSPLITTING CATALOGUE:\n")
-        source_catalogue_module()
+        # source_catalogue_module()
         # Create masks for each tile
         print("\nCREATING MASKS:\n")
         mask_module()

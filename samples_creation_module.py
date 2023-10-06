@@ -40,8 +40,11 @@ class SampleCreator:
         # Cropping, resizing and saving images
         cv2.imwrite(input_path, cv2.resize(self.input_image[y:y + side_size, x:x + side_size],
                                            self.sample_resolution))
-        cv2.imwrite(output_path, cv2.resize(self.mask_image[y:y + side_size, x:x + side_size],
-                                            self.sample_resolution))
+        resized_mask = cv2.resize(self.mask_image[y:y + side_size, x:x + side_size],
+                                  self.sample_resolution)
+        resized_mask = cv2.threshold(resized_mask, 127, 255, cv2.THRESH_BINARY)[1]
+        # resized_mask = np.where(resized_mask > 127, 1, 0)
+        cv2.imwrite(output_path, resized_mask)
 
     def show_random_samples(self):
         # Define the range for random side size (min_side_size_px to max_side_size_px)
@@ -63,6 +66,8 @@ class SampleCreator:
 
         resized_input_image = cv2.resize(cropped_input_image, self.sample_resolution)
         resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)
+
+        resized_mask_image = cv2.threshold(resized_mask_image, 127, 255, cv2.THRESH_BINARY)[1]
 
         # Concatenate the images vertically along their shared edge
         combined_image = cv2.hconcat([resized_input_image, resized_mask_image])
@@ -253,6 +258,12 @@ class SampleCreator:
             # Convert mask image and cropped mask to BGR
             resized_mask_image = cv2.cvtColor(resized_mask_image, cv2.COLOR_GRAY2BGR)
             resized_cropped_mask = cv2.cvtColor(resized_cropped_mask, cv2.COLOR_GRAY2BGR)
+            # Add red bounding rectangle to resized_mask_image
+            thickness = 3
+            color = (0, 0, 255)  # Red color in BGR format
+            cv2.rectangle(resized_mask_image, (0, 0),
+                          (new_edge, new_edge), color, thickness)
+
             # Concatenate the images vertically along their shared edge. Previous concat + new image + white bar
             combined_masks = cv2.hconcat([combined_masks.astype(np.uint8), resized_mask_image.astype(np.uint8),
                                           np.full((self.sample_resolution[0], offset, 3),
