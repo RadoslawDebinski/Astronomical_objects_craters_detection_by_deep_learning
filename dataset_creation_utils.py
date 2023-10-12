@@ -1,7 +1,6 @@
 from csv_sorter_module import SourceTypeSeparator
 from mask_module import MaskCreator
 from samples_creation_module import SampleCreator
-import re
 import py7zr
 import os
 
@@ -17,8 +16,6 @@ OUTPUT_IMAGES = f"{DATASET_ROOT}\\OutputImages"
 
 # Constants for proper CSV and tales processing
 CSV_TILES_NAMES = {
-    "00-\d-\d{6}": "WAC_GLOBAL_P900S0000_100M",
-    "01-\d-\d{6}": "WAC_GLOBAL_P900N0000_100M",
     "02-\d-\d{6}": "WAC_GLOBAL_E300N2250_100M",
     "03-\d-\d{6}": "WAC_GLOBAL_E300S2250_100M",
     "04-\d-\d{6}": "WAC_GLOBAL_E300N3150_100M",
@@ -48,7 +45,7 @@ RESOLUTION = 303.23  # pixels per degree
 
 # End dataset properties
 MIN_CROP_AREA_SIZE_KM = 50
-MAX_CROP_AREA_SIZE_KM = 50
+MAX_CROP_AREA_SIZE_KM = 75
 SAMPLE_RESOLUTION = (256, 256)
 
 # Moon constants
@@ -82,7 +79,7 @@ def open_zip_module():
     if not os.path.exists(INPUT_DATA_PATH):
         os.makedirs(INPUT_DATA_PATH)
     # Iterate through the files in the archive ignore first two pools: P900S0000 and P900N0000
-    for name in data_names[2:]:
+    for name in data_names:
         # Open 7z
         print(f"Opening {INPUT_ZIP_PATH} file.")
         with py7zr.SevenZipFile(INPUT_ZIP_PATH, mode='r') as archive:
@@ -106,20 +103,20 @@ def source_catalogue_module():
 def mask_module():
     iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
     # Iteration throw created CSV files with rejection of polar images: P900S, P900N
-    for index, tile in enumerate(TILES_NAMES[2:], start=2):
+    for index, tile in enumerate(TILES_NAMES):
         iMGA.img_load(os.path.join(INPUT_DATA_PATH, tile))
         # iMGA.img_analyze()
         key = CSV_TILES_KEYS[index]
-        iMGA.place_craters(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv", TILES_BOUNDS[index - 2])
+        iMGA.place_craters(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv", TILES_BOUNDS[index])
         iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
 
 
 def creation_module(no_samples):
     scale_px = 1 / SCALE_KM
     # How many samples create per tile
-    no_samples_per_tile = int(no_samples / len(TILES_NAMES[2:]))
+    no_samples_per_tile = int(no_samples / len(TILES_NAMES))
     # Iteration through created CSV files with rejection of polar images: P900S, P900N
-    for index, tile in enumerate(TILES_NAMES[2:], start=2):
+    for index, tile in enumerate(TILES_NAMES):
         # Info which tile is during processing
         print(f"Processing {index - 1} tile: {tile}")
         key = CSV_TILES_KEYS[index]
@@ -144,7 +141,7 @@ def creation_module(no_samples):
 def examples_module():
     scale_px = 1 / SCALE_KM
     # Iteration through created CSV files with rejection of polar images: P900S, P900N
-    for index, tile in enumerate(TILES_NAMES[2:], start=2):
+    for index, tile in enumerate(TILES_NAMES):
         key = CSV_TILES_KEYS[index]
         # Feeding Sample creator with parameters
         sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,

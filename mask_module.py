@@ -84,3 +84,9 @@ class MaskCreator:
         # Process finished display summary
         print("Craters placing 100%")
         print(f"No. rejected craters: {rejected_craters_counter}, it's {rejected_craters_counter / num_rows}%")
+
+    def save_mask(self, output_path):
+        if cv2.imwrite(output_path, self.mask_img):
+            print("Mask saved successfully.")
+        else:
+            print("Mask not saved successfully!")
