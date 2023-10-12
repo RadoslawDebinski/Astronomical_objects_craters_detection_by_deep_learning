@@ -48,7 +48,7 @@ RESOLUTION = 303.23  # pixels per degree
 
 # End dataset properties
 MIN_CROP_AREA_SIZE_KM = 50
-MAX_CROP_AREA_SIZE_KM = 100
+MAX_CROP_AREA_SIZE_KM = 50
 SAMPLE_RESOLUTION = (256, 256)
 
 # Moon constants
@@ -143,28 +143,28 @@ def creation_module(no_samples):
 
 def examples_module():
     scale_px = 1 / SCALE_KM
-    # tile_number = 2
-    # key = CSV_TILES_KEYS[tile_number]
-    # # Create example of mask with distortions
-    # iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
-    # iMGA.img_load(os.path.join(INPUT_DATA_PATH, TILES_NAMES[tile_number]))
-    # iMGA.place_craters_dis(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv", TILES_BOUNDS[tile_number-2])
-    # iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_DIS_{CSV_TILES_NAMES[key]}.jpg")
-    # # Feeding Sample creator with fixed parameters
-    # sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
-    #                    SCALE_KM, os.path.join(INPUT_DATA_PATH, TILES_NAMES[tile_number]),
-    #                    f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
-    # # Show comparison of different compressed areas
-    # sC.show_compression_comp(f"{TEMP_CRATERS_BY_TILE_DIR}\\COM_COMP_{CSV_TILES_NAMES[key]}.jpg")
-    # # Feeding Sample creator with fixed parameters
-    # sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
-    #                    SCALE_KM, os.path.join(INPUT_DATA_PATH, TILES_NAMES[tile_number]),
-    #                    f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_DIS_{CSV_TILES_NAMES[key]}.jpg")
-    # # Show example of distortions 2x4 images
-    # sC.show_distortions_example(f"{TEMP_CRATERS_BY_TILE_DIR}\\EXM_DIS_{CSV_TILES_NAMES[key]}.jpg")
-    # # Show example of different masks 1x2 images
-    # sC.show_comparison(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg",
-    #                    f"{TEMP_CRATERS_BY_TILE_DIR}\\COM_DIS_{CSV_TILES_NAMES[key]}.jpg")
+    tile_number = 2
+    key = CSV_TILES_KEYS[tile_number]
+    # Create example of mask with distortions
+    iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
+    iMGA.img_load(os.path.join(INPUT_DATA_PATH, TILES_NAMES[tile_number]))
+    iMGA.place_craters_dis(f"{TEMP_CRATERS_BY_TILE_DIR}\\{CSV_TILES_NAMES[key]}.csv", TILES_BOUNDS[tile_number-2])
+    iMGA.save_mask(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_DIS_{CSV_TILES_NAMES[key]}.jpg")
+    # Feeding Sample creator with fixed parameters
+    sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
+                       SCALE_KM, os.path.join(INPUT_DATA_PATH, TILES_NAMES[tile_number]),
+                       f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
+    # Show comparison of different compressed areas
+    sC.show_compression_comp(f"{TEMP_CRATERS_BY_TILE_DIR}\\COM_COMP_{CSV_TILES_NAMES[key]}.jpg")
+    # Feeding Sample creator with fixed parameters
+    sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
+                       SCALE_KM, os.path.join(INPUT_DATA_PATH, TILES_NAMES[tile_number]),
+                       f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_DIS_{CSV_TILES_NAMES[key]}.jpg")
+    # Show example of distortions 2x4 images
+    sC.show_distortions_example(f"{TEMP_CRATERS_BY_TILE_DIR}\\EXM_DIS_{CSV_TILES_NAMES[key]}.jpg")
+    # Show example of different masks 1x2 images
+    sC.show_comparison(f"{TEMP_CRATERS_BY_TILE_DIR}\\MASK_{CSV_TILES_NAMES[key]}.jpg",
+                       f"{TEMP_CRATERS_BY_TILE_DIR}\\COM_DIS_{CSV_TILES_NAMES[key]}.jpg")
 
     # Iteration through created CSV files with rejection of polar images: P900S, P900N
     for index, tile in enumerate(TILES_NAMES[2:], start=2):

@@ -20,8 +20,6 @@ class MaskCreator:
         self.gray_img = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
         # Initiate mask image with gray image's shape
         self.mask_img = np.zeros(np.shape(self.gray_img))
-        # Convert grayscale to RGB
-        # self.rgb_img = cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)
 
     def img_analyze(self):
         height, width = self.gray_img.shape
@@ -30,7 +28,7 @@ class MaskCreator:
         print(f"Width: {width} px")
 
     def _mark_crater_rim(self, longitude, latitude, long_limit, lat_limit, radius_km):
-        if radius_km > 1.5:
+        if radius_km > 0:
             # Draw circumference around center point
             crater_circum_km = 2 * math.pi * radius_km
             steps = int(crater_circum_km / self.scale)
@@ -77,7 +75,7 @@ class MaskCreator:
                 print(f"Craters placing: {process_counter}%", end='\r')
 
         # Define the neighborhood size (adjust as needed)
-        neighborhood_size = 5
+        neighborhood_size = 3
         # Create a kernel for dilation
         kernel = np.ones((neighborhood_size, neighborhood_size), np.uint8)
         # Dilate the white areas in second_mask
