@@ -1,3 +1,6 @@
+# Input 7zip fie name which contains all required data (WACs, catalog). Should be placed in CONST_PATH["tempSRC"] dir
+INPUT_ZIP_NAME = "InputData.7z"
+
 # Constant paths dict which is used to create folders tree of the whole project
 CONST_PATH = {
     "data":     "data",
@@ -23,10 +26,12 @@ CONST_PATH = {
     "wacORG":   "data\\dataset\\wac\\original",
     "wacMASK":  "data\\dataset\\wac\\masked",
 
-    "temp":     "data\\temp"
+    "temp":     "data\\temp",
+    "tempSRC":  "data\\temp\\source"
 }
-INPUT_ZIP_PATH = "data\\temp\\InputData.7z"
-
+# Robbins catalogue of craters file name
+CRATERS_CATALOGUE_NAME = "data_lunar_crater_database_robbins_2018.csv"
+FIRST_COL_ID = "CRATER_ID"
 # Constants for proper CSV and tales processing
 CSV_TILES_NAMES = {
     "02-\d-\d{6}": "WAC_GLOBAL_E300N2250_100M",
@@ -50,8 +55,6 @@ TILES_NAMES = [
     "WAC_GLOBAL_E300N1350_100M.tif",
     "WAC_GLOBAL_E300S1350_100M.tif"
 ]
-
-FIRST_COL_ID = "CRATER_ID"
 COLS_NAMES_TO_ANALYZE = ["LAT_CIRC_IMG", "LON_CIRC_IMG", "LAT_ELLI_IMG", "LON_ELLI_IMG"]
 
 # Bound for tiles with Equirectangular projection
@@ -66,6 +69,7 @@ TILES_BOUNDS = [(0,   60, 180, 270),
 
 # WAC tiles images constants
 SCALE_KM = 0.1  # kilometers per pixel
+SCALE_PX = 1 / SCALE_KM  # pixels per kilometer
 RESOLUTION = 303.23  # pixels per degree
 
 # Properties of output images

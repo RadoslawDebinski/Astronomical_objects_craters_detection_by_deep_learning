@@ -1,8 +1,6 @@
-import time
-import torch
-from torchvision import transforms
+import os
 from torch.utils.data import Dataset
-from dataset_creation_utils import *
+from dataset_creation_utils import dir_module, creation_module
 from PIL import Image
 
 
@@ -15,38 +13,6 @@ class ImageAnnotationDataset(Dataset):
         self.annotation_root_dir = annotation_root_dir
         self.transform = transform
         self.input_image_paths, self.annotation_image_paths = self.load_dataset()
-
-    @staticmethod
-    def create_metadata():
-        # Check if working dirs exists, if not create it
-        print("\nCHECKING DIRECTORIES:\n")
-        dir_module()
-        # Unpack 7zip to directories
-        print("\nUNPACKING DATA:\n")
-        # open_zip_module()
-        # Split source catalog for data corresponding to each tile
-        print("\nSPLITTING CATALOGUE:\n")
-        # source_catalogue_module()
-        # Create masks for each tile
-        print("\nCREATING MASKS:\n")
-        mask_module()
-
-    @staticmethod
-    def show_examples():
-        examples_module()
-
-    @staticmethod
-    def create_dataset(no_samples):
-        # Check if working dirs exists, if not create it
-        print("\nCHECKING DIRECTORIES:\n")
-        dir_module()
-        start_time = time.time()
-        # Create dataset
-        print("\nCREATING DATASET:\n")
-        creation_module(no_samples)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Dataset creator execution time: {execution_time} seconds")
 
     def load_dataset(self):
         input_files = sorted(os.listdir(self.input_root_dir))

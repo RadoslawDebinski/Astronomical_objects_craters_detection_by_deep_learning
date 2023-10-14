@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import math
-import py7zr
+from config import KERNEL_SIZE
 
 
 class MaskCreator:
@@ -74,10 +74,8 @@ class MaskCreator:
                 process_counter = int(index / num_rows * 100)
                 print(f"Craters placing: {process_counter}%", end='\r')
 
-        # Define the neighborhood size (adjust as needed)
-        neighborhood_size = 3
         # Create a kernel for dilation
-        kernel = np.ones((neighborhood_size, neighborhood_size), np.uint8)
+        kernel = np.ones((KERNEL_SIZE, KERNEL_SIZE), np.uint8)
         # Dilate the white areas in second_mask
         self.mask_img = cv2.dilate(self.mask_img, kernel, iterations=1)
 
