@@ -29,6 +29,18 @@ CONST_PATH = {
     "temp":     "data\\temp",
     "tempSRC":  "data\\temp\\source"
 }
+# Constant paths dict which is used to clear dataset folders before creating the new one
+CONST_PATH_CLEAR = {
+    "trainIN":  "data\\dataset\\training\\input",
+    "trainOUT": "data\\dataset\\training\\output",
+
+    "validIN":  "data\\dataset\\validation\\input",
+    "validOUT": "data\\dataset\\validation\\output",
+
+    "testIN":   "data\\dataset\\testing\\input",
+    "testOUT":  "data\\dataset\\testing\\output"
+}
+
 # Robbins catalogue of craters file name
 CRATERS_CATALOGUE_NAME = "data_lunar_crater_database_robbins_2018.csv"
 FIRST_COL_ID = "CRATER_ID"
