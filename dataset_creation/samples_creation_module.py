@@ -1,10 +1,5 @@
-import contextlib
 import cv2
-import numpy as np
-import pandas as pd
-import math
 import random
-import py7zr
 
 
 class SampleCreator:
@@ -42,6 +37,9 @@ class SampleCreator:
         # Generate random (x, y) coordinates for the top-left corner of the square
         x = random.randint(0, self.image_width - side_size)
         y = random.randint(0, self.image_height - side_size)
+
+        # TODO Adding ccrs.Orthographic projection to output
+
         # Cropping, resizing and saving images
         cv2.imwrite(input_path, cv2.resize(self.input_image[y:y + side_size, x:x + side_size],
                                            self.sample_resolution))

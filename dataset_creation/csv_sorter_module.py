@@ -1,8 +1,5 @@
 import pandas as pd
-import re
 from prettytable import PrettyTable
-import py7zr
-import io
 
 
 class SourceTypeSeparator:

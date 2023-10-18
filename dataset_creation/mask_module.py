@@ -1,9 +1,10 @@
+from config import KERNEL_SIZE
+
 import contextlib
 import cv2
 import numpy as np
 import pandas as pd
 import math
-from config import KERNEL_SIZE
 
 
 class MaskCreator:

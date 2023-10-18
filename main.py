@@ -6,5 +6,5 @@ from config import CONST_PATH
 if __name__ == "__main__":
     # iA = ImageAnnotationDataset(CONST_PATH['trainIN'], CONST_PATH['trainOUT'])
     # input_d, output_d = iA.load_dataset()
-    prep_src_data(open_7zip=False, split_catalogue=False, create_masks=False)
-    create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, clear_past=1)
+    prep_src_data(open_7zip=True, split_catalogue=True, create_masks=True)
+    create_dataset(no_samples_train=10, no_samples_valid=10, no_samples_test=10, clear_past=1)
