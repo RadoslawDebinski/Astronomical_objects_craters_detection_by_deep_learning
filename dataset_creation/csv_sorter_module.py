@@ -18,6 +18,9 @@ class SourceTypeSeparator:
         self.split_craters_by_tile_dir = split_craters_by_tile_dir
 
     def split_craters_by_tile_id(self):
+        """
+        Purpose of this function is to split given catalogue of craters to independent sub-catalogues for each WAC tile.
+        """
         print(f"Processing {self.data_path}\\{self.catalogue_name}")
         # Read the CSV data into a DataFrame
         df = pd.read_csv(f"{self.data_path}\\{self.catalogue_name}")
@@ -35,6 +38,9 @@ class SourceTypeSeparator:
             filtered_rows.to_csv(output_file, index=False)
 
     def analyze_split_crater_by_tile_id(self, cols_names_to_analyze):
+        """
+        Function to analyze the split data
+        """
         myTable = PrettyTable(["FILE_NAME"] + cols_names_to_analyze)
 
         id_patterns = self.tiles_names.keys()

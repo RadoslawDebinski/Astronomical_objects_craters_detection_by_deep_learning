@@ -5,6 +5,9 @@ from PIL import Image
 
 
 class ImageAnnotationDataset(Dataset):
+    """
+    This class is extended version of standard approach to custom dataset loader in torch library
+    """
     def __init__(self, input_root_dir, annotation_root_dir, transform=None):
         # Check if working dirs exists, if not create it
         print("\nCHECKING DIRECTORIES:\n")

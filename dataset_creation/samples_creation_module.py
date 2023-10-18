@@ -17,9 +17,11 @@ class SampleCreator:
         self.mask_image = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
         self.image_height, self.image_width = self.input_image.shape[:2]
 
-    # Rotation - for eventually further usage
     @staticmethod
     def _rotate_image(image, angle):
+        """
+        Rotation of images - for eventually further usage
+        """
         # Get the dimensions of the image
         height, width = image.shape[:2]
 
@@ -32,7 +34,10 @@ class SampleCreator:
         return cv2.warpAffine(image, rotation_matrix, (width, height))
 
     def make_sample(self, input_path, output_path):
-        # Define the range for random side size (min_side_size_px to max_side_size_px)
+        """
+        Create the right sample for dataset
+        """
+        # Define the range for random side size (from min_side_size_px to max_side_size_px)
         side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
         # Generate random (x, y) coordinates for the top-left corner of the square
         x = random.randint(0, self.image_width - side_size)
@@ -43,10 +48,13 @@ class SampleCreator:
         resized_mask = cv2.resize(self.mask_image[y:y + side_size, x:x + side_size],
                                   self.sample_resolution)
         resized_mask = cv2.threshold(resized_mask, 127, 255, cv2.THRESH_BINARY)[1]
-        # resized_mask = np.where(resized_mask > 127, 1, 0)
+
         cv2.imwrite(output_path, resized_mask)
 
     def show_random_samples(self):
+        """
+        This feature is intended to provide sample data for a future dataset
+        """
         # Define the range for random side size (min_side_size_px to max_side_size_px)
         side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
 

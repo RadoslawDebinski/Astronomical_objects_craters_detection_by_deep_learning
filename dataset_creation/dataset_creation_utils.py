@@ -14,8 +14,10 @@ import time
 import shutil
 
 
-# Preparation of source data for dataset creation process
 def prep_src_data(open_7zip=True, split_catalogue=True, create_masks=True, show_examples=False):
+    """
+    Preparation of source data for dataset creation process
+    """
     # Check if working dirs exists, if not create it
     print("\nCHECKING DIRECTORIES:\n")
     dir_module()
@@ -36,6 +38,9 @@ def prep_src_data(open_7zip=True, split_catalogue=True, create_masks=True, show_
 
 
 def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, clear_past=0):
+    """
+    Purpose of this function is to create each part of dataset and optionally call directories clearing
+    """
     # Check if working dirs exists, if not create it
     print("\nCHECKING DIRECTORIES:\n")
     # Clear dataset directories
@@ -44,6 +49,7 @@ def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, cl
     dir_module()
     # Start time measurement
     start_time = time.time()
+    # Create samples for each part od dataset
     if no_samples_train:
         print("\nCREATING DATASET TRAINING PART:\n")
         creation_module(no_samples_train, CONST_PATH['trainIN'], CONST_PATH['trainOUT'])
@@ -59,8 +65,10 @@ def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, cl
     print(f"Dataset creator execution time: {execution_time} seconds")
 
 
-# Check if all directories exists if not make them
 def dir_module():
+    """
+    Check if all directories exists if not make them
+    """
     print(f'Working directory: {os.getcwd()}')
     for path in CONST_PATH.values():
         data_dir = os.path.join(os.getcwd(), path)
@@ -74,6 +82,9 @@ def dir_module():
 
 
 def dir_clear_module():
+    """
+    Function to clear output directories of whole dataset
+    """
     for path in list(CONST_PATH_CLEAR.values()):
         data_dir = os.path.join(os.getcwd(), path)
         if os.path.exists(data_dir):
@@ -83,8 +94,10 @@ def dir_clear_module():
             print(f"Directory {path} is empty.")
 
 
-# Load 7zip data
 def open_zip_module(input_zip_path=f"{CONST_PATH['tempSRC']}\\{INPUT_ZIP_NAME}"):
+    """
+    Function to load source data from 7zip file
+    """
     # List of available data names
     data_names = TILES_NAMES.copy() + [CRATERS_CATALOGUE_NAME]
     # Check if the output directory exists; if not, create it
@@ -107,8 +120,10 @@ def open_zip_module(input_zip_path=f"{CONST_PATH['tempSRC']}\\{INPUT_ZIP_NAME}")
                 print(f"Unzipped {name} to {CONST_PATH['cataORG']}")
 
 
-# CSV dataset splitting and analysis module handling
 def source_catalogue_module(analyze_catalogue=False):
+    """
+    CSV dataset splitting handling and analysis module
+    """
     sTS = SourceTypeSeparator(CONST_PATH['cataORG'], CRATERS_CATALOGUE_NAME, FIRST_COL_ID, CSV_TILES_NAMES,
                               CONST_PATH['cataDIV'])
     sTS.split_craters_by_tile_id()
@@ -116,10 +131,12 @@ def source_catalogue_module(analyze_catalogue=False):
         sTS.analyze_split_crater_by_tile_id(COLS_NAMES_TO_ANALYZE)
 
 
-# Images loading, conversion, processing and mask creation module handling
 def mask_module():
+    """
+    Images loading, conversion, processing and mask creation module handling
+    """
     iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
-    # Iteration throw created CSV files with rejection of polar images: P900S, P900N
+    # Iteration throw created CSV files
     for index, tile in enumerate(TILES_NAMES):
         iMGA.img_load(os.path.join(CONST_PATH['wacORG'], tile))
         # iMGA.img_analyze()
@@ -129,8 +146,11 @@ def mask_module():
 
 
 def examples_module():
+    """
+    Optional module for showing examples of created masks
+    """
     scale_px = 1 / SCALE_KM
-    # Iteration through created CSV files with rejection of polar images: P900S, P900N
+    # Iteration through created CSV files
     for index, tile in enumerate(TILES_NAMES):
         key = CSV_TILES_KEYS[index]
         # Feeding Sample creator with parameters
@@ -141,9 +161,13 @@ def examples_module():
 
 
 def creation_module(no_samples, input_path, output_path):
+    """
+    Purpose of this module is to create given number of samples for NN.
+    Second and third parameter defines directories where future input and output of network should be saved
+    """
     # How many samples create per tile
     no_samples_per_tile = int(no_samples / len(TILES_NAMES))
-    # Iteration through created CSV files with rejection of polar images: P900S, P900N
+    # Iteration through created CSV files
     for index, tile in enumerate(TILES_NAMES):
         # Info which tile is during processing
         print(f"Processing tile no.{index + 1}: {tile}")
@@ -160,7 +184,7 @@ def creation_module(no_samples, input_path, output_path):
             for i in range(no_samples_per_tile)
         ]
 
-        # Define a lambda function to create samples
+        # Define a function to create samples
         for name in file_names:
             sC.make_sample(f"{input_path}\\{name}.jpg", f"{output_path}\\{name}.jpg")
         print(f"{no_samples_per_tile} samples created")

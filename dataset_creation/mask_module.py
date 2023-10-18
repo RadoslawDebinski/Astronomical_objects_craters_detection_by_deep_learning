@@ -17,17 +17,26 @@ class MaskCreator:
         self.rim_intensity = rim_intensity
 
     def img_load(self, file_path):
+        """
+        Load image as grayscale one and prepare clear background for mask
+        """
         self.gray_img = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
         # Initiate mask image with gray image's shape
         self.mask_img = np.zeros(np.shape(self.gray_img))
 
     def img_analyze(self):
+        """
+        Print parameters of tile
+        """
         height, width = self.gray_img.shape
         print("Image properties:")
         print(f"Height: {height} px")
         print(f"Width: {width} px")
 
     def _mark_crater_rim(self, longitude, latitude, long_limit, lat_limit, radius_km):
+        """
+        Function to draw crater's rim in given position and with defined radius
+        """
         if radius_km > 0:
             # Draw circumference around center point
             crater_circum_km = 2 * math.pi * radius_km
@@ -50,6 +59,9 @@ class MaskCreator:
                     self.mask_img[pixel_y, pixel_x] = self.rim_intensity
 
     def place_craters(self, csv_dir, bounds):
+        """
+        Simple pipeline to process craters from CSV sub-catalogue for selected WAC tile
+        """
         # Read the CSV file with dataset into a Pandas DataFrame
         df = pd.read_csv(csv_dir)
         # Initiate process variables and communicates
@@ -84,6 +96,9 @@ class MaskCreator:
         print(f"No. rejected craters: {rejected_craters_counter}, it's {rejected_craters_counter / num_rows}%")
 
     def save_mask(self, output_path):
+        """
+        Saving created mask for WAC tile
+        """
         if cv2.imwrite(output_path, self.mask_img):
             print("Mask saved successfully.")
         else:
