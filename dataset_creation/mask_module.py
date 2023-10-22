@@ -1,4 +1,4 @@
-from config import KERNEL_SIZE
+from settings import KERNEL_SIZE
 
 import contextlib
 import cv2

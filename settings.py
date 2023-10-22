@@ -4,6 +4,7 @@ INPUT_ZIP_NAME = "InputData.7z"
 # Constant paths dict which is used to create folders tree of the whole project
 CONST_PATH = {
     "data":     "data",
+    "model":    "data\\model",
     "dataset":  "data\\dataset",
 
     "train":    "data\\dataset\\training",
@@ -29,17 +30,12 @@ CONST_PATH = {
     "temp":     "data\\temp",
     "tempSRC":  "data\\temp\\source"
 }
-# Constant paths dict which is used to clear dataset folders before creating the new one
-CONST_PATH_CLEAR = {
-    "trainIN":  "data\\dataset\\training\\input",
-    "trainOUT": "data\\dataset\\training\\output",
-
-    "validIN":  "data\\dataset\\validation\\input",
-    "validOUT": "data\\dataset\\validation\\output",
-
-    "testIN":   "data\\dataset\\testing\\input",
-    "testOUT":  "data\\dataset\\testing\\output"
-}
+# Constant paths list which is used to clear dataset folders before creating the new one
+CONST_PATH_CLEAR = [
+    CONST_PATH["trainIN"], CONST_PATH["trainOUT"],
+    CONST_PATH["validIN"], CONST_PATH["validOUT"],
+    CONST_PATH["testIN"], CONST_PATH["testOUT"]
+]
 
 # Robbins catalogue of craters file name
 CRATERS_CATALOGUE_NAME = "data_lunar_crater_database_robbins_2018.csv"
@@ -97,4 +93,30 @@ LONGITUDE_MOON_CIRCUMFERENCE_KM = 10907
 CRATER_RIM_INTENSITY = 255
 KERNEL_SIZE = 3
 
+# ==================================
 
+# Neural network architecture params
+NET_PARAMS = {
+    "in_channels":  1,
+    "out_channels": 1,
+    "filters_num":  64
+}
+
+# Optimizer params
+OPTIM_PARAMS = {
+    "learning_rate": 0.0005,
+    "weight_decay":  10e-5
+}
+
+# Scheduler params
+SCHED_PARAMS = {
+    "t_max":   10,
+    "eta_min": 0.001
+}
+
+# Training params
+TRAIN_PARAMS = {
+    "num_epochs": 15,
+    "batch_size": 16,
+    "save_interval_iter": 50
+}

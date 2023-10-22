@@ -1,7 +1,7 @@
 from dataset_creation.csv_sorter_module import SourceTypeSeparator
 from dataset_creation.mask_module import MaskCreator
 from dataset_creation.samples_creation_module import SampleCreator
-from config import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, \
+from settings import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, \
                    CRATERS_CATALOGUE_NAME, \
                    FIRST_COL_ID, CSV_TILES_NAMES, COLS_NAMES_TO_ANALYZE, \
                    SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY, \
@@ -37,7 +37,7 @@ def prep_src_data(open_7zip=True, split_catalogue=True, create_masks=True, show_
         examples_module()
 
 
-def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, clear_past=0):
+def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, clear_past=False):
     """
     Purpose of this function is to create each part of dataset and optionally call directories clearing
     """
@@ -85,7 +85,7 @@ def dir_clear_module():
     """
     Function to clear output directories of whole dataset
     """
-    for path in list(CONST_PATH_CLEAR.values()):
+    for path in CONST_PATH_CLEAR:
         data_dir = os.path.join(os.getcwd(), path)
         if os.path.exists(data_dir):
             shutil.rmtree(data_dir)
