@@ -8,7 +8,7 @@ from settings import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, 
                    CSV_TILES_KEYS, TILES_BOUNDS, \
                    MIN_CROP_AREA_SIZE_KM, MAX_CROP_AREA_SIZE_KM, SCALE_PX, SAMPLE_RESOLUTION
 
-import py7zr
+# import py7zr
 import os
 import time
 import shutil
@@ -157,7 +157,7 @@ def examples_module():
         sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
                            SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
                            f"{CONST_PATH['wacMASK']}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
-        sC.show_random_samples()
+        sC.show_random_samples(TILES_BOUNDS[index])
 
 
 def creation_module(no_samples, input_path, output_path):

@@ -1,5 +1,11 @@
 import cv2
+import numpy as np
 import random
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+from settings import RESOLUTION
 
 
 class SampleCreator:
@@ -49,9 +55,9 @@ class SampleCreator:
 
         cv2.imwrite(output_path, resized_mask)
 
-    def show_random_samples(self):
+    def show_random_samples(self, bounds):
         """
-        This feature is intended to provide sample data for a future dataset
+        This feature is intended to provide sample data of a future dataset
         """
         # Define the range for random side size (min_side_size_px to max_side_size_px)
         side_size = random.randint(self.min_side_size_px, self.max_side_size_px)
@@ -67,30 +73,64 @@ class SampleCreator:
         x2 = x + side_size
         y2 = y + side_size
 
+        # Crop images
         cropped_input_image = self.input_image[y:y2, x:x2]
         cropped_mask_image = self.mask_image[y:y2, x:x2]
 
-        resized_input_image = cv2.resize(cropped_input_image, self.sample_resolution)
-        resized_mask_image = cv2.resize(cropped_mask_image, self.sample_resolution)
+        # Get longitude and latitude of center
+        long_limit, lat_limit = bounds[2], bounds[1]
 
-        resized_mask_image = cv2.threshold(resized_mask_image, 127, 255, cv2.THRESH_BINARY)[1]
+        center_px_x = (x + x2) / 2
+        center_long = center_px_x * 90 / self.input_image.shape[1] + long_limit
+        center_px_y = (y + y2) / 2
+        center_lat = lat_limit - center_px_y * 60 / self.input_image.shape[0]
 
-        # Concatenate the images vertically along their shared edge
-        combined_image = cv2.hconcat([resized_input_image, resized_mask_image])
+        # projection = ccrs.Orthographic(
+        #     central_longitude=0.0,  # Centered at the Moon's prime meridian
+        #     central_latitude=0.0,  # Centered at the Moon's equator
+        #     globe=ccrs.Globe(semimajor_axis=1738100.0, semiminor_axis=1737400.0)
+        #     # Moon's semimajor and semiminor axes
+        # )
 
-        # Info for user
-        edge_length_km = int(side_size * self.scale_km)
-        print(f'Presented area cords are x from: {x}px to: {x2}px, y from: {y}px to: {y2}px')
-        print(f'Presented area size is: {edge_length_km}x{edge_length_km}km')
+        projection = ccrs.Geostationary(central_longitude=0.0, satellite_height=1737400.0, globe=None)
+
+        # Define extent in degrees
+        deg_per_px = 1 / RESOLUTION
+        extent = [center_long - (side_size / 2) * deg_per_px, center_long + (side_size / 2) * deg_per_px,
+                  center_lat - (side_size / 2) * deg_per_px, center_lat + (side_size / 2) * deg_per_px]
+
+        # Create a figure and axis with the orthographic projection
+        fig, ax = plt.subplots(subplot_kw={'projection': projection})
+
+        # Plot the Moon image on the orthographic projection for input
+        ax.imshow(cropped_input_image, extent=extent, transform=ccrs.PlateCarree(), origin='upper')
+        # Remove the axes
+        ax.set_axis_off()
+
+        # Create a FigureCanvasAgg instance to render the figure
+        canvas = FigureCanvasAgg(fig)
+        canvas.draw()
+
+        transformed_input_image = np.array(fig.canvas.renderer.buffer_rgba())
+        # Plot the Moon image on the orthographic projection for output
+        ax.imshow(cropped_mask_image, extent=extent, transform=ccrs.PlateCarree(), origin='upper')
+        # Remove the axes
+        ax.set_axis_off()
+
+        # Create a FigureCanvasAgg instance to render the figure
+        canvas = FigureCanvasAgg(fig)
+        canvas.draw()
+
+        transformed_mask_image = np.array(fig.canvas.renderer.buffer_rgba())
+
+        combined_image_pure = cv2.hconcat([cv2.resize(cropped_input_image, self.sample_resolution),
+                                           cv2.resize(cropped_mask_image, self.sample_resolution)])
+
+        combined_image_trans = cv2.hconcat([cv2.resize(transformed_input_image, self.sample_resolution),
+                                            cv2.resize(transformed_mask_image, self.sample_resolution)])
 
         # Display the combined image
-        cv2.imshow('Combined Image', combined_image)
+        cv2.imshow('Combined Image',  cv2.vconcat([combined_image_pure, combined_image_trans]))
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
-
-
-
-
-
 
