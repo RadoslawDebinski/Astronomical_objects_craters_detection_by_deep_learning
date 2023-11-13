@@ -1,4 +1,4 @@
-from settings import KERNEL_SIZE
+from settings import MOON_KERNEL_SIZE
 
 import contextlib
 import cv2
@@ -88,7 +88,7 @@ class MaskCreator:
                 print(f"Craters placing: {process_counter}%", end='\r')
 
         # Create a kernel for dilation
-        kernel = np.ones((KERNEL_SIZE, KERNEL_SIZE), np.uint8)
+        kernel = np.ones((MOON_KERNEL_SIZE, MOON_KERNEL_SIZE), np.uint8)
         # Dilate the white areas in second_mask
         self.mask_img = cv2.dilate(self.mask_img, kernel, iterations=1)
 
