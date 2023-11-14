@@ -85,8 +85,8 @@ class MarsSamples:
         # Our images has nearly 2,25 * 10^9px
         # So limit of pixels in Pillow have to be enlarged or for example deleted via line below
         Image.MAX_IMAGE_PIXELS = None
-        self.src_image = np.array(Image.open(os.path.join(CONST_PATH["marsORG"], self.file_name)))
-        self.src_mask = np.zeros(np.shape(self.src_image))
+        self.src_image = np.array(Image.open(os.path.join(CONST_PATH["marsORG"], self.file_name))).astype(np.uint8)
+        self.src_mask = np.zeros(np.shape(self.src_image)).astype(np.uint8)
         self.src_image_shape_0 = np.shape(self.src_image)[0]
         self.src_image_shape_1 = np.shape(self.src_image)[1]
 
@@ -130,23 +130,25 @@ class MarsSamples:
                 pixel_y = int((self.lat_max_limit - latitude - gamma_y) * self.src_image_shape_0 / MARS_TILE_DEG_SPAN)
                 # Place a pixel at the specified coordinates
                 with contextlib.suppress(IndexError):
-                    # # Create a mesh grid of coordinates
-                    # y, x = np.ogrid[:self.src_image_shape_0, :self.src_image_shape_1]
-                    # # Create a circular mask using the distance from the center
-                    # mask = ((x - pixel_x) ** 2 + (y - pixel_y) ** 2) <= MARS_KERNEL_SIZE ** 2
-                    #
-                    # # Update the circular region with self.rim_intensity
-                    # self.src_mask[mask] = self.rim_intensity
-                    self.src_mask[pixel_y, pixel_x] = self.rim_intensity
+                    # Create a circular mask
+                    mask = np.zeros_like(self.src_mask, dtype=np.uint8)
+                    cv2.circle(mask, (pixel_x, pixel_y), MARS_KERNEL_SIZE, self.rim_intensity, thickness=-1)
+
+                    # # Update the original array using the mask
+                    # self.src_mask = np.maximum(self.src_mask, mask)
+                    # Update the original array using bitwise OR
+
+                    self.src_mask = cv2.bitwise_or(self.src_mask, mask)
+                print(f"Crater placing: {round(step / steps * 100)}%", end='\r')
 
             print(f"Craters placing: {round(process_counter / num_rows * 100)}%", end='\r')
             process_counter += 1
         # Process finished display summary
         print("Craters placing 100%")
-        # Create a kernel for dilation
-        kernel = np.ones((MARS_KERNEL_SIZE, MARS_KERNEL_SIZE), np.uint8)
-        # Dilate the white areas in second_mask
-        self.src_mask = cv2.dilate(self.src_mask, kernel, iterations=1)
+        # # Create a kernel for dilation
+        # kernel = np.ones((MARS_KERNEL_SIZE, MARS_KERNEL_SIZE), np.uint8)
+        # # Dilate the white areas in second_mask
+        # self.src_mask = cv2.dilate(self.src_mask, kernel, iterations=1)
 
     def create_dataset(self):
         # Every imported image will be split to 4 independent samples
@@ -171,22 +173,22 @@ class MarsSamples:
     def create_samples(self, show_examples=False):
         # Split the image into quadrants
         left_upper_src_img = cv2.resize(self.src_image[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2],
-                                        SAMPLE_RESOLUTION).astype(np.uint8)
+                                        SAMPLE_RESOLUTION)
         right_upper_src_img = cv2.resize(self.src_image[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:],
-                                         SAMPLE_RESOLUTION).astype(np.uint8)
+                                         SAMPLE_RESOLUTION)
         left_lower_src_img = cv2.resize(self.src_image[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2],
-                                        SAMPLE_RESOLUTION).astype(np.uint8)
+                                        SAMPLE_RESOLUTION)
         right_lower_src_img = cv2.resize(self.src_image[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:],
-                                         SAMPLE_RESOLUTION).astype(np.uint8)
+                                         SAMPLE_RESOLUTION)
         # Split the mask into quadrants
         left_upper_src_mask = cv2.resize(self.src_mask[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2],
-                                         SAMPLE_RESOLUTION).astype(np.uint8)
+                                         SAMPLE_RESOLUTION)
         right_upper_src_mask = cv2.resize(self.src_mask[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:],
-                                          SAMPLE_RESOLUTION).astype(np.uint8)
+                                          SAMPLE_RESOLUTION)
         left_lower_src_mask = cv2.resize(self.src_mask[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2],
-                                         SAMPLE_RESOLUTION).astype(np.uint8)
+                                         SAMPLE_RESOLUTION)
         right_lower_src_mask = cv2.resize(self.src_mask[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:],
-                                          SAMPLE_RESOLUTION).astype(np.uint8)
+                                          SAMPLE_RESOLUTION)
         # Safe input samples
         cv2.imwrite(os.path.join(CONST_PATH["marsIN"], "0" + self.file_name.replace(".tif", ".jpg")),
                     left_upper_src_img)
@@ -214,10 +216,6 @@ class MarsSamples:
 
     @staticmethod
     def show_example(resized_input_image, resized_mask_image):
-        print(resized_input_image.shape)
-        print(resized_mask_image.shape)
-        print(resized_input_image.dtype)
-        print(resized_mask_image.dtype)
         combined_image = cv2.hconcat([resized_input_image, resized_mask_image])
         cv2.imshow('Combined Image', combined_image)
         cv2.waitKey(0)
