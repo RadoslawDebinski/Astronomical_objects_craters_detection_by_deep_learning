@@ -1,8 +1,7 @@
 import contextlib
 import math
 import os
-import zipfile
-import shutil
+
 import cv2
 import pandas as pd
 import numpy as np
@@ -11,8 +10,12 @@ from PIL import Image
 from settings import CONST_PATH, MARS_TILE_DEG_SPAN, \
     MARS_CATALOGUE_NAME, MARS_CATALOGUE_LAT, MARS_CATALOGUE_LONG, MARS_CATALOGUE_DIAM, \
     MARS_SCALE_KM, MEAN_MARS_RADIUS_KM, LONGITUDE_MARS_CIRCUMFERENCE_KM, \
-    CRATER_RIM_INTENSITY, SAMPLE_RESOLUTION, MARS_KERNEL_SIZE
+    CRATER_RIM_INTENSITY, MARS_KERNEL_SIZE, MARS_MASK_RESOLUTION, \
+    MURRAY_LAB_URL, MAX_MARS_SAMPLES_BORDER
+
 from dataset_creation.dataset_creation_utils import dir_module
+from transfer_learning.mars_online_data_utils import get_zip_list_url, sort_tiles_longitude, \
+    download_image, initialize_json
 
 
 class MarsSamples:
@@ -35,40 +38,6 @@ class MarsSamples:
         # Load mars crater catalogue
         self.catalogue = pd.read_csv(os.path.join(CONST_PATH["tempMars"], MARS_CATALOGUE_NAME), low_memory=False)
 
-    @staticmethod
-    def unzip_mars_tiles(open_zip=True, copy_tif=True):
-        """
-        Purpose of this script is to unzip files from data/temp/mars
-        and copy .tif files from them to data/transfer_learning/original
-        """
-        # Check directories
-        dir_module()
-        # Unzip all zip files from temp Mars directory
-        if open_zip:
-            # List all the files in the folder
-            file_list = os.listdir(CONST_PATH['tempMars'])
-
-            # Iterate through the files and unzip the ones with a '.zip' extension
-            for file_name in file_list:
-                if file_name.endswith('.zip'):
-                    file_path = os.path.join(CONST_PATH['tempMars'], file_name)
-                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                        print(f'Unzipping {file_name}')
-                        zip_ref.extractall(CONST_PATH['tempMars'])
-
-        # Iterate through all unzipped directories and look for .tif files then copy them
-        if copy_tif:
-            # Use os.listdir to get a list of all files and folders in the specified directory
-            contents = os.listdir(CONST_PATH['tempMars'])
-
-            # Filter out only the folders (directories) and iterate
-            for folder_name in [item for item in contents if os.path.isdir(os.path.join(CONST_PATH['tempMars'], item))]:
-                for file in os.listdir(os.path.join(CONST_PATH["tempMars"], folder_name)):
-                    if file.endswith('.tif'):
-                        print(f'Copying {file} to {os.path.join(CONST_PATH["marsORG"], file)}')
-                        shutil.copy(os.path.join(CONST_PATH["tempMars"], folder_name, file),
-                                    os.path.join(CONST_PATH["marsORG"], file))
-
     def calc_bounds(self):
         lat_min_limit, long_min_limit = self.file_name.split("E")[1].split("N")
         self.lat_min_limit, self.long_min_limit = map(lambda x: int(x.split("_")[0]),
@@ -80,30 +49,17 @@ class MarsSamples:
         self.long_min_limit = self.long_min_limit + 360 if self.long_min_limit <= 0 else self.long_min_limit
         self.long_max_limit = self.long_max_limit + 360 if self.long_max_limit <= 0 else self.long_max_limit
 
-    def load_src(self):
+    def load_src(self, image_data):
         # Default size of image in Pillow cannot exceed nearly 1,8 * 10^8px
         # Our images has nearly 2,25 * 10^9px
         # So limit of pixels in Pillow have to be enlarged or for example deleted via line below
         Image.MAX_IMAGE_PIXELS = None
-        self.src_image = np.array(Image.open(os.path.join(CONST_PATH["marsORG"], self.file_name))).astype(np.uint8)
+        self.src_image = cv2.resize(np.array(Image.open(image_data)).astype(np.uint8), MARS_MASK_RESOLUTION)
         self.src_mask = np.zeros(np.shape(self.src_image)).astype(np.uint8)
         self.src_image_shape_0 = np.shape(self.src_image)[0]
         self.src_image_shape_1 = np.shape(self.src_image)[1]
 
-    def create_mask(self):
-        # Get all craters for this tile from catalogue
-        filtered_rows = self.catalogue[
-            (self.catalogue[MARS_CATALOGUE_LAT] > self.lat_min_limit) &
-            (self.catalogue[MARS_CATALOGUE_LAT] < self.lat_max_limit) &
-            (self.catalogue[MARS_CATALOGUE_LONG] > self.long_min_limit) &
-            (self.catalogue[MARS_CATALOGUE_LONG] < self.long_max_limit)
-            ]
-
-        # Extract the second and third columns as lists
-        latitude_list = filtered_rows[MARS_CATALOGUE_LAT].tolist()
-        longitude_list = filtered_rows[MARS_CATALOGUE_LONG].tolist()
-        diameters_list = filtered_rows[MARS_CATALOGUE_DIAM].tolist()
-
+    def _mark_craters_rim(self, latitude_list, longitude_list, diameters_list):
         num_rows = len(latitude_list)
 
         print(f"Processing craters for: \"{self.file_name}\" started.")
@@ -130,65 +86,54 @@ class MarsSamples:
                 pixel_y = int((self.lat_max_limit - latitude - gamma_y) * self.src_image_shape_0 / MARS_TILE_DEG_SPAN)
                 # Place a pixel at the specified coordinates
                 with contextlib.suppress(IndexError):
-                    # Create a circular mask
-                    mask = np.zeros_like(self.src_mask, dtype=np.uint8)
-                    cv2.circle(mask, (pixel_x, pixel_y), MARS_KERNEL_SIZE, self.rim_intensity, thickness=-1)
-
-                    # # Update the original array using the mask
-                    # self.src_mask = np.maximum(self.src_mask, mask)
-                    # Update the original array using bitwise OR
-
-                    self.src_mask = cv2.bitwise_or(self.src_mask, mask)
-                print(f"Crater placing: {round(step / steps * 100)}%", end='\r')
+                    self.src_mask[pixel_y, pixel_x] = self.rim_intensity
 
             print(f"Craters placing: {round(process_counter / num_rows * 100)}%", end='\r')
             process_counter += 1
         # Process finished display summary
         print("Craters placing 100%")
-        # # Create a kernel for dilation
-        # kernel = np.ones((MARS_KERNEL_SIZE, MARS_KERNEL_SIZE), np.uint8)
-        # # Dilate the white areas in second_mask
-        # self.src_mask = cv2.dilate(self.src_mask, kernel, iterations=1)
 
-    def create_dataset(self):
-        # Every imported image will be split to 4 independent samples
-        no_samples = self.no_samples / 4
+    def create_mask(self, add_kernel=False):
+        # Get all craters for this tile from catalogue
+        filtered_rows = self.catalogue[
+            (self.catalogue[MARS_CATALOGUE_LAT] > self.lat_min_limit) &
+            (self.catalogue[MARS_CATALOGUE_LAT] < self.lat_max_limit) &
+            (self.catalogue[MARS_CATALOGUE_LONG] > self.long_min_limit) &
+            (self.catalogue[MARS_CATALOGUE_LONG] < self.long_max_limit)
+        ]
 
-        # TODO here will be added gathering list of .zip files available on MURRAY_LAB_URL
+        # Extract the second and third columns as lists
+        latitude_list = filtered_rows[MARS_CATALOGUE_LAT].tolist()
+        longitude_list = filtered_rows[MARS_CATALOGUE_LONG].tolist()
+        diameters_list = filtered_rows[MARS_CATALOGUE_DIAM].tolist()
 
-        # TODO here will be sorting of that list of .zip files via longitude
+        self._mark_craters_rim(latitude_list, longitude_list, diameters_list)
 
-        # Samples creation loop starts here
-
-        # TODO here will be added downloading package with image from MURRAY_LAB_URL
-
-        # TODO here will be added unpacking image from downloaded zip
-
-        # Here bounds calculation
-
-        # TODO here will be mask creation for that image
-
-        # TODO here will be sample creation
+        if add_kernel:
+            # Create a kernel for dilation
+            kernel = np.ones((MARS_KERNEL_SIZE, MARS_KERNEL_SIZE), np.uint8)
+            # Dilate the white areas in second_mask
+            self.src_mask = cv2.dilate(self.src_mask, kernel, iterations=1)
 
     def create_samples(self, show_examples=False):
         # Split the image into quadrants
-        left_upper_src_img = cv2.resize(self.src_image[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2],
-                                        SAMPLE_RESOLUTION)
-        right_upper_src_img = cv2.resize(self.src_image[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:],
-                                         SAMPLE_RESOLUTION)
-        left_lower_src_img = cv2.resize(self.src_image[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2],
-                                        SAMPLE_RESOLUTION)
-        right_lower_src_img = cv2.resize(self.src_image[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:],
-                                         SAMPLE_RESOLUTION)
+        left_upper_src_img = self.src_image[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2]
+                                        
+        right_upper_src_img = self.src_image[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:]
+                                         
+        left_lower_src_img = self.src_image[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2]
+                                        
+        right_lower_src_img = self.src_image[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:]
+                                         
         # Split the mask into quadrants
-        left_upper_src_mask = cv2.resize(self.src_mask[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2],
-                                         SAMPLE_RESOLUTION)
-        right_upper_src_mask = cv2.resize(self.src_mask[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:],
-                                          SAMPLE_RESOLUTION)
-        left_lower_src_mask = cv2.resize(self.src_mask[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2],
-                                         SAMPLE_RESOLUTION)
-        right_lower_src_mask = cv2.resize(self.src_mask[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:],
-                                          SAMPLE_RESOLUTION)
+        left_upper_src_mask = self.src_mask[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2]
+                                         
+        right_upper_src_mask = self.src_mask[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:]
+                                          
+        left_lower_src_mask = self.src_mask[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2]
+                                         
+        right_lower_src_mask = self.src_mask[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:]
+                                          
         # Safe input samples
         cv2.imwrite(os.path.join(CONST_PATH["marsIN"], "0" + self.file_name.replace(".tif", ".jpg")),
                     left_upper_src_img)
@@ -221,11 +166,32 @@ class MarsSamples:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def example_temp(self):
-        contents = os.listdir(CONST_PATH["marsORG"])
-        self.file_name = contents[0]
-        self.load_src()
-        self.calc_bounds()
-        self.create_mask()
-        self.create_samples(True)
-        print("End of example")
+    def create_dataset(self):
+        # Number of samples cannot exceed max available amount of data
+        if self.no_samples >= MAX_MARS_SAMPLES_BORDER:
+            return print(f"Number of samples: {self.no_samples} is above "
+                         f"the limit of: {MAX_MARS_SAMPLES_BORDER} samples.")
+
+        # Every imported image will be split to 4 independent samples
+        no_samples = int(self.no_samples / 4)
+        # Gathering list of .zip files available on MURRAY_LAB_URL
+        available_downloads = get_zip_list_url(MURRAY_LAB_URL)
+        # Sorting that list of .zip files via longitude
+        correct_downloads = sort_tiles_longitude(available_downloads)
+        # Taking only the number of samples required by a user
+        correct_downloads = dict(list(correct_downloads.items())[:no_samples])
+        # Initialize .json file to store info about downloads
+        initialize_json()
+        # Samples creation loop starts here
+        for href in correct_downloads:
+            print(f'Downloading file: {href}')
+            # Collect image name and data from href
+            self.file_name, image_bit_stream = download_image(correct_downloads[href])
+            if self.file_name is None or image_bit_stream is None:
+                continue
+            self.load_src(image_bit_stream)
+            # Mask and samples creation process
+            self.calc_bounds()
+            self.create_mask()
+            self.create_samples()
+

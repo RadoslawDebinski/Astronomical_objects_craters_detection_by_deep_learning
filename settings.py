@@ -4,38 +4,36 @@
 
 # Constant paths dict which is used to create folders tree of the whole project
 CONST_PATH = {
-    "data":     "data",
-    "model":    "data\\model",
-    "dataset":  "data\\dataset",
+    "data":        "data",
+    "model":       "data\\model",
+    "dataset":     "data\\dataset",
 
-    "train":    "data\\dataset\\training",
-    "trainIN":  "data\\dataset\\training\\input",
-    "trainOUT": "data\\dataset\\training\\output",
+    "train":       "data\\dataset\\training",
+    "trainIN":     "data\\dataset\\training\\input",
+    "trainOUT":    "data\\dataset\\training\\output",
 
-    "valid":    "data\\dataset\\validation",
-    "validIN":  "data\\dataset\\validation\\input",
-    "validOUT": "data\\dataset\\validation\\output",
+    "valid":       "data\\dataset\\validation",
+    "validIN":     "data\\dataset\\validation\\input",
+    "validOUT":    "data\\dataset\\validation\\output",
 
-    "test":     "data\\dataset\\testing",
-    "testIN":   "data\\dataset\\testing\\input",
-    "testOUT":  "data\\dataset\\testing\\output",
+    "test":        "data\\dataset\\testing",
+    "testIN":      "data\\dataset\\testing\\input",
+    "testOUT":     "data\\dataset\\testing\\output",
 
-    "cata":     "data\\dataset\\catalogs",
-    "cataORG":  "data\\dataset\\catalogs\\original",
-    "cataDIV":  "data\\dataset\\catalogs\\divided",
+    "cata":        "data\\dataset\\catalogs",
+    "cataORG":     "data\\dataset\\catalogs\\original",
+    "cataDIV":     "data\\dataset\\catalogs\\divided",
 
-    "wac":      "data\\dataset\\wac",
-    "wacORG":   "data\\dataset\\wac\\original",
-    "wacMASK":  "data\\dataset\\wac\\masked",
+    "wac":         "data\\dataset\\wac",
+    "wacORG":      "data\\dataset\\wac\\original",
+    "wacMASK":     "data\\dataset\\wac\\masked",
 
-    "marsORG":   "data\\transfer_learning\\original",
-    "marsMASK":  "data\\transfer_learning\\masked",
-    "marsIN":    "data\\transfer_learning\\input",
-    "marsOUT":   "data\\transfer_learning\\output",
+    "marsIN":      "data\\transfer_learning\\input",
+    "marsOUT":     "data\\transfer_learning\\output",
 
-    "temp":     "data\\temp",
-    "tempSRC":  "data\\temp\\source",
-    "tempMars":  "data\\temp\\mars"
+    "temp":        "data\\temp",
+    "tempSRC":     "data\\temp\\source",
+    "tempMars":    "data\\temp\\mars",
 
 }
 # Constant paths list which is used to clear dataset folders before creating the new one
@@ -97,7 +95,6 @@ RESOLUTION = 303.23  # pixels per degree
 """
     PROPERTIES OF ROBBINS MARS CATALOGUE AND MARS TILES
 """
-
 MURRAY_LAB_URL = 'https://murray-lab.caltech.edu/CTX/V01/tiles/?fbclid=IwAR1QOxLwPgvvZ2ScBaI11hjX6mODBmdp-IesRkGBgO5HJKotpEqX6jBiFow'
 MARS_CATALOGUE_NAME = 'Catalog_Mars_Release_2020_1kmPlus_FullMorphData.csv'
 MARS_CATALOGUE_LONG = 'LON_CIRC_IMG'
@@ -125,10 +122,17 @@ MIN_CROP_AREA_SIZE_KM = 50
 MAX_CROP_AREA_SIZE_KM = 50
 SAMPLE_RESOLUTION = (256, 256)
 
-# Other processing constants
+"""
+    OTHER DATA PROCESSING SAMPLES
+"""
+
 CRATER_RIM_INTENSITY = 255
 MOON_KERNEL_SIZE = 3
 MARS_KERNEL_SIZE = 50
+MARS_MASK_RESOLUTION = (2 * 256, 2 * 256)
+MAX_MARS_PROCESSING_LONGITUDE = 60
+URL_BACKUP_COUNTER_PATH = 'transfer_learning\\connection_properties.json'
+MAX_MARS_SAMPLES_BORDER = 4680
 
 """
     CONSTANTS FOR NEURAL NETWORK AND LEARNING PROCESS
