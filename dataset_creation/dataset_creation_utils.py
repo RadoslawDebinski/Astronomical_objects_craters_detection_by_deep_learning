@@ -2,11 +2,11 @@ from dataset_creation.csv_sorter_module import SourceTypeSeparator
 from dataset_creation.mask_module import MaskCreator
 from dataset_creation.samples_creation_module import SampleCreator
 from settings import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, \
-                   CRATERS_CATALOGUE_NAME, \
+                   MOON_CATALOGUE_NAME, \
                    FIRST_COL_ID, CSV_TILES_NAMES, COLS_NAMES_TO_ANALYZE, \
-                   SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY, \
+                   MOON_SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY, \
                    CSV_TILES_KEYS, TILES_BOUNDS, \
-                   MIN_CROP_AREA_SIZE_KM, MAX_CROP_AREA_SIZE_KM, SCALE_PX, SAMPLE_RESOLUTION
+                   MIN_CROP_AREA_SIZE_KM, MAX_CROP_AREA_SIZE_KM, MOON_SCALE_PX, SAMPLE_RESOLUTION
 
 import py7zr
 import os
@@ -99,7 +99,7 @@ def open_zip_module(input_zip_path=f"{CONST_PATH['tempSRC']}\\{INPUT_ZIP_NAME}")
     Function to load source data from 7zip file
     """
     # List of available data names
-    data_names = TILES_NAMES.copy() + [CRATERS_CATALOGUE_NAME]
+    data_names = TILES_NAMES.copy() + [MOON_CATALOGUE_NAME]
     # Check if the output directory exists; if not, create it
     if not os.path.exists(CONST_PATH['tempSRC']):
         os.makedirs(CONST_PATH['tempSRC'])
@@ -110,7 +110,7 @@ def open_zip_module(input_zip_path=f"{CONST_PATH['tempSRC']}\\{INPUT_ZIP_NAME}")
                 raise NotImplementedError(f"{input_zip_path} -> {name} was not opened correctly,"
                                           f"does not exist or contains invalid data")
             print(f"Unzipping {name} file.")
-            if name != CRATERS_CATALOGUE_NAME:
+            if name != MOON_CATALOGUE_NAME:
                 # Extract the WAC tiles to the specified path
                 archive.extract(path=CONST_PATH['wacORG'], targets=[name])
                 print(f"Unzipped {name} to {CONST_PATH['wacORG']}")
@@ -124,7 +124,7 @@ def source_catalogue_module(analyze_catalogue=False):
     """
     CSV dataset splitting handling and analysis module
     """
-    sTS = SourceTypeSeparator(CONST_PATH['cataORG'], CRATERS_CATALOGUE_NAME, FIRST_COL_ID, CSV_TILES_NAMES,
+    sTS = SourceTypeSeparator(CONST_PATH['cataORG'], MOON_CATALOGUE_NAME, FIRST_COL_ID, CSV_TILES_NAMES,
                               CONST_PATH['cataDIV'])
     sTS.split_craters_by_tile_id()
     if analyze_catalogue:
@@ -135,7 +135,7 @@ def mask_module():
     """
     Images loading, conversion, processing and mask creation module handling
     """
-    iMGA = MaskCreator(SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
+    iMGA = MaskCreator(MOON_SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY)
     # Iteration throw created CSV files
     for index, tile in enumerate(TILES_NAMES):
         iMGA.img_load(os.path.join(CONST_PATH['wacORG'], tile))
@@ -149,13 +149,13 @@ def examples_module():
     """
     Optional module for showing examples of created masks
     """
-    scale_px = 1 / SCALE_KM
+    scale_px = 1 / MOON_SCALE_KM
     # Iteration through created CSV files
     for index, tile in enumerate(TILES_NAMES):
         key = CSV_TILES_KEYS[index]
         # Feeding Sample creator with parameters
         sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * scale_px, MAX_CROP_AREA_SIZE_KM * scale_px, SAMPLE_RESOLUTION,
-                           SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
+                           MOON_SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
                            f"{CONST_PATH['wacMASK']}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
         sC.show_random_samples()
 
@@ -175,8 +175,8 @@ def creation_module(no_samples, input_path, output_path):
         # Create base name for sample
         file_name = "0" * len(str(no_samples_per_tile))
         # Feeding Sample creator with parameters
-        sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * SCALE_PX, MAX_CROP_AREA_SIZE_KM * SCALE_PX, SAMPLE_RESOLUTION,
-                           SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
+        sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * MOON_SCALE_PX, MAX_CROP_AREA_SIZE_KM * MOON_SCALE_PX, SAMPLE_RESOLUTION,
+                           MOON_SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
                            f"{CONST_PATH['wacMASK']}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
         # Create file names
         file_names = [
