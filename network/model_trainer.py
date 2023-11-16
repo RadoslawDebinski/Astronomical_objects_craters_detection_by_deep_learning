@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from sklearn.metrics import precision_score, recall_score, f1_score
 from datetime import datetime
 
 
@@ -57,14 +56,12 @@ class ModelTrainer:
 
         if type(module) == nn.Conv2d or type(module) == nn.Linear:
             torch.nn.init.kaiming_uniform_(module.weight)
-            module.bias.data.fill_(0.01)
 
     def train(self, epoch, start_time, batch_size, save_path=".", save_interval=50):
         """
         Epoch training process
         """
 
-        self.model = self.model.to(self.device)
         self.model.train()
 
         train_loss = 0.0
@@ -77,17 +74,19 @@ class ModelTrainer:
             self.optimizer.zero_grad()
 
             outputs = self.model(images)
-            preds = torch.round(torch.sigmoid(outputs)).data.cpu().numpy().flatten()
-            binary_masks = torch.round(masks).data.cpu().numpy().flatten()
 
             loss = self.criterion(outputs, masks)
+            batch_loss = loss.item()
             loss.backward()
             self.optimizer.step()
 
-            batch_loss = loss.item()
-            batch_precision = precision_score(binary_masks, preds, zero_division=0.0)
-            batch_recall = recall_score(binary_masks, preds)
-            batch_f1 = f1_score(binary_masks, preds)
+            TP = (masks * outputs).sum().item()
+            FP = ((1 - masks) * outputs).sum().item()
+            FN = (masks * (1 - outputs)).sum().item()
+
+            batch_precision = TP / (TP + FP) if TP + FP > 0 else 0.0
+            batch_recall = TP / (TP + FN) if TP + FN > 0 else 0.0
+            batch_f1 = 2 * (batch_precision * batch_recall) / (batch_precision + batch_recall) if batch_precision + batch_recall > 0 else 0.0
 
             train_loss += batch_loss
             train_precision += batch_precision
@@ -99,7 +98,7 @@ class ModelTrainer:
 
                 current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
                 with open(f"{save_path}/train_info_{start_time}.txt", "a") as f:
-                    info = f"{current_time} | Phase: train | Epoch: {epoch} | Images: {batch_idx * batch_size} | L: {batch_loss:.4f} | P: {batch_precision:.4f} | R: {batch_recall:.4f}\n"
+                    info = f"{current_time} | Phase: train | Epoch: {epoch} | Images: {batch_idx * batch_size} | L: {batch_loss:.4f} <{(train_loss / (batch_idx+1)):.4f}> | P: {batch_precision:.4f} <{(train_precision / (batch_idx+1)):.4f}> | R: {batch_recall:.4f} <{(train_recall / (batch_idx+1)):.4f}> | F1: {batch_f1:.4f} <{(train_f1 / (batch_idx+1)):.4f}>\n"
                     print(info)
                     f.write(info)
 
@@ -112,7 +111,7 @@ class ModelTrainer:
 
         current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
         with open(f"{save_path}/train_info_{start_time}.txt", "a") as f:
-            info = f"{current_time} | Phase: train | [END] Epoch: {epoch} | L: {train_loss:.4f} | P: {train_precision:.4f} | R: {train_recall:.4f} | F1: {train_f1:.4f}\n"
+            info = f"{current_time} | Phase: train | [END] Epoch: {epoch} | L: <{train_loss:.4f}> | P: <{train_precision:.4f}> | R: <{train_recall:.4f}> | F1: <{train_f1:.4f}>\n"
             print(info)
             f.write(info)
 
@@ -121,7 +120,6 @@ class ModelTrainer:
         Epoch validating process
         """
 
-        self.model = self.model.to(self.device)
         self.model.eval()
 
         valid_loss = 0.0
@@ -134,15 +132,17 @@ class ModelTrainer:
                 images, masks = images.to(self.device), masks.to(self.device)
 
                 outputs = self.model(images)
-                preds = torch.round(torch.sigmoid(outputs)).data.cpu().numpy().flatten()
-                binary_masks = torch.round(masks).data.cpu().numpy().flatten()
 
                 loss = self.criterion(outputs, masks)
-
                 batch_loss = loss.item()
-                batch_precision = precision_score(binary_masks, preds, zero_division=0.0)
-                batch_recall = recall_score(binary_masks, preds)
-                batch_f1 = f1_score(binary_masks, preds)
+
+                TP = (masks * outputs).sum().item()
+                FP = ((1 - masks) * outputs).sum().item()
+                FN = (masks * (1 - outputs)).sum().item()
+
+                batch_precision = TP / (TP + FP) if TP + FP > 0 else 0.0
+                batch_recall = TP / (TP + FN) if TP + FN > 0 else 0.0
+                batch_f1 = 2 * (batch_precision * batch_recall) / (batch_precision + batch_recall) if batch_precision + batch_recall > 0 else 0.0
 
                 valid_loss += batch_loss
                 valid_precision += batch_precision
@@ -152,7 +152,7 @@ class ModelTrainer:
                 if batch_idx % save_interval == 0:
                     current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
                     with open(f"{save_path}/train_info_{start_time}.txt", "a") as f:
-                        info = f"{current_time} | Phase: valid | Epoch: {epoch} | Images: {batch_idx * batch_size} | L: {batch_loss:.4f} | P: {batch_precision:.4f} | R: {batch_recall:.4f}\n"
+                        info = f"{current_time} | Phase: valid | Epoch: {epoch} | Images: {batch_idx * batch_size} | L: {batch_loss:.4f} <{(valid_loss / (batch_idx+1)):.4f}> | P: {batch_precision:.4f} <{(valid_precision / (batch_idx+1)):.4f}> | R: {batch_recall:.4f} <{(valid_recall / (batch_idx+1)):.4f}> | F1: {batch_f1:.4f} <{(valid_f1 / (batch_idx+1)):.4f}>\n"
                         print(info)
                         f.write(info)
 
@@ -163,6 +163,6 @@ class ModelTrainer:
 
             current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
             with open(f"{save_path}/train_info_{start_time}.txt", "a") as f:
-                info = f"{current_time} | Phase: valid | [END] Epoch: {epoch} | L: {valid_loss:.4f} | P: {valid_precision:.4f} | R: {valid_recall:.4f} | F1: {valid_f1:.4f}\n"
+                info = f"{current_time} | Phase: valid | [END] Epoch: {epoch} | L: <{valid_loss:.4f}> | P: <{valid_precision:.4f}> | R: <{valid_recall:.4f}> | F1: <{valid_f1:.4f}>\n"
                 print(info)
                 f.write(info)
