@@ -2,7 +2,7 @@ from dataset_creation.csv_sorter_module import SourceTypeSeparator
 from dataset_creation.mask_module import MaskCreator
 from dataset_creation.samples_creation_module import SampleCreator
 from settings import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, \
-                   MOON_CATALOGUE_NAME, \
+                   MOON_CATALOGUE_NAME, MARS_CATALOGUE_NAME, \
                    FIRST_COL_ID, CSV_TILES_NAMES, COLS_NAMES_TO_ANALYZE, \
                    MOON_SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY, \
                    CSV_TILES_KEYS, TILES_BOUNDS, \
@@ -94,15 +94,15 @@ def dir_clear_module():
             print(f"Directory {path} is empty.")
 
 
-def open_zip_module(input_zip_path=f"{CONST_PATH['tempSRC']}\\{INPUT_ZIP_NAME}"):
+def open_zip_module(input_zip_path=f"{CONST_PATH['source']}\\{INPUT_ZIP_NAME}"):
     """
     Function to load source data from 7zip file
     """
     # List of available data names
-    data_names = TILES_NAMES.copy() + [MOON_CATALOGUE_NAME]
+    data_names = TILES_NAMES.copy() + [MOON_CATALOGUE_NAME, MARS_CATALOGUE_NAME]
     # Check if the output directory exists; if not, create it
-    if not os.path.exists(CONST_PATH['tempSRC']):
-        os.makedirs(CONST_PATH['tempSRC'])
+    if not os.path.exists(CONST_PATH['source']):
+        os.makedirs(CONST_PATH['source'])
     # Iterate through the files in the archive
     for name in data_names:
         with py7zr.SevenZipFile(input_zip_path, mode='r') as archive:
@@ -110,14 +110,16 @@ def open_zip_module(input_zip_path=f"{CONST_PATH['tempSRC']}\\{INPUT_ZIP_NAME}")
                 raise NotImplementedError(f"{input_zip_path} -> {name} was not opened correctly,"
                                           f"does not exist or contains invalid data")
             print(f"Unzipping {name} file.")
-            if name != MOON_CATALOGUE_NAME:
-                # Extract the WAC tiles to the specified path
-                archive.extract(path=CONST_PATH['wacORG'], targets=[name])
-                print(f"Unzipped {name} to {CONST_PATH['wacORG']}")
+            if name in [MOON_CATALOGUE_NAME, MARS_CATALOGUE_NAME]:
+                if not os.path.exists(os.path.join(CONST_PATH['cataORG'], name)):
+                    # Extract the catalog tiles to the specified path
+                    archive.extract(path=CONST_PATH['cataORG'], targets=[name])
+                    print(f"Unzipped {name} to {CONST_PATH['cataORG']}")
             else:
-                # Extract the catalog tiles to the specified path
-                archive.extract(path=CONST_PATH['cataORG'], targets=[name])
-                print(f"Unzipped {name} to {CONST_PATH['cataORG']}")
+                if not os.path.exists(os.path.join(CONST_PATH['wacORG'], name)):
+                    # Extract the WAC tiles to the specified path
+                    archive.extract(path=CONST_PATH['wacORG'], targets=[name])
+                    print(f"Unzipped {name} to {CONST_PATH['wacORG']}")
 
 
 def source_catalogue_module(analyze_catalogue=False):

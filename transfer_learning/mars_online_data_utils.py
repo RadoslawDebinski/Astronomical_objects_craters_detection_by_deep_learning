@@ -37,7 +37,7 @@ def sort_tiles_longitude(files_dict):
     approved_dict = {}
     for file_name in files_dict.keys():
         max_longitude = file_name[:-4].split("N")[1]
-        if not abs(int(max_longitude)) <= MAX_MARS_PROCESSING_LONGITUDE:
+        if abs(int(max_longitude)) <= MAX_MARS_PROCESSING_LONGITUDE:
             approved_dict[file_name] = files_dict[file_name]
 
     return approved_dict
@@ -67,31 +67,5 @@ def download_image(url):
                 return None, None
     else:
         print("Failed to fetch the ZIP file")
-        increment_failed_counter()
         return None, None
 
-
-def initialize_json():
-    try:
-        with open(URL_BACKUP_COUNTER_PATH, 'r') as backup:
-            data = json.load(backup)
-    except FileNotFoundError:
-        data = {'failed_connections_url': 0}
-
-    with open(URL_BACKUP_COUNTER_PATH, 'w') as backup:
-        json.dump(data, backup)
-
-
-def increment_failed_counter():
-    with open(URL_BACKUP_COUNTER_PATH, 'r+') as backup:
-        data = json.load(backup)
-        data['failed_connections_url'] += 1
-        backup.seek(0)
-        json.dump(data, backup)
-        backup.truncate()
-
-
-def get_failed_counter():
-    with open(URL_BACKUP_COUNTER_PATH, 'r') as backup:
-        data = json.load(backup)
-        return data['failed_connections_url']

@@ -31,9 +31,7 @@ CONST_PATH = {
     "marsIN":      "data\\transfer_learning\\input",
     "marsOUT":     "data\\transfer_learning\\output",
 
-    "temp":        "data\\temp",
-    "tempSRC":     "data\\temp\\source",
-    "tempMars":    "data\\temp\\mars",
+    "source":      "data\\source",
 
 }
 # Constant paths list which is used to clear dataset folders before creating the new one
@@ -132,7 +130,7 @@ MARS_KERNEL_SIZE = 50
 MARS_MASK_RESOLUTION = (2 * 256, 2 * 256)
 MAX_MARS_PROCESSING_LONGITUDE = 60
 URL_BACKUP_COUNTER_PATH = 'transfer_learning\\connection_properties.json'
-MAX_MARS_SAMPLES_BORDER = 4680
+MAX_MARS_SAMPLES_BORDER = 11160
 
 """
     CONSTANTS FOR NEURAL NETWORK AND LEARNING PROCESS

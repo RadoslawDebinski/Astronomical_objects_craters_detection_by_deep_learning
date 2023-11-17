@@ -15,7 +15,7 @@ from settings import CONST_PATH, MARS_TILE_DEG_SPAN, \
 
 from dataset_creation.dataset_creation_utils import dir_module
 from transfer_learning.mars_online_data_utils import get_zip_list_url, sort_tiles_longitude, \
-    download_image, initialize_json
+    download_image
 
 
 class MarsSamples:
@@ -36,7 +36,7 @@ class MarsSamples:
         self.long_max_limit = None
         self.rim_intensity = CRATER_RIM_INTENSITY
         # Load mars crater catalogue
-        self.catalogue = pd.read_csv(os.path.join(CONST_PATH["tempMars"], MARS_CATALOGUE_NAME), low_memory=False)
+        self.catalogue = pd.read_csv(os.path.join(CONST_PATH["cataORG"], MARS_CATALOGUE_NAME), low_memory=False)
 
     def calc_bounds(self):
         lat_min_limit, long_min_limit = self.file_name.split("E")[1].split("N")
@@ -180,8 +180,6 @@ class MarsSamples:
         correct_downloads = sort_tiles_longitude(available_downloads)
         # Taking only the number of samples required by a user
         correct_downloads = dict(list(correct_downloads.items())[:no_samples])
-        # Initialize .json file to store info about downloads
-        initialize_json()
         # Samples creation loop starts here
         for href in correct_downloads:
             print(f'Downloading file: {href}')
