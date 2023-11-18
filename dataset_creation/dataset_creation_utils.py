@@ -1,7 +1,7 @@
 from dataset_creation.csv_sorter_module import SourceTypeSeparator
 from dataset_creation.mask_module import MaskCreator
 from dataset_creation.samples_creation_module import SampleCreator
-from settings import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, \
+from settings import CONST_PATH, CONST_PATH_CLEAR, INPUT_ZIP_NAME, TILES_NAMES, MOON_TILE_TO_GENERATE_TEST_NAME, \
                    MOON_CATALOGUE_NAME, MARS_CATALOGUE_NAME, \
                    FIRST_COL_ID, CSV_TILES_NAMES, COLS_NAMES_TO_ANALYZE, \
                    MOON_SCALE_KM, MEAN_MOON_RADIUS_KM, LONGITUDE_MOON_CIRCUMFERENCE_KM, CRATER_RIM_INTENSITY, \
@@ -12,6 +12,7 @@ import py7zr
 import os
 import time
 import shutil
+import copy
 
 
 def prep_src_data(open_7zip=True, split_catalogue=True, create_masks=True, show_examples=False):
@@ -58,7 +59,7 @@ def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, cl
         creation_module(no_samples_valid, CONST_PATH['validIN'], CONST_PATH['validOUT'])
     if no_samples_test:
         print("\nCREATING DATASET TEST PART:\n")
-        creation_module(no_samples_test, CONST_PATH['testIN'], CONST_PATH['testOUT'])
+        creation_module(no_samples_test, CONST_PATH['testIN'], CONST_PATH['testOUT'], test_gen=True)
     # End time measurement
     end_time = time.time()
     execution_time = end_time - start_time
@@ -162,23 +163,28 @@ def examples_module():
         sC.show_random_samples()
 
 
-def creation_module(no_samples, input_path, output_path):
+def creation_module(no_samples, input_path, output_path, test_gen=False):
     """
     Purpose of this module is to create given number of samples for NN.
-    Second and third parameter defines directories where future input and output of network should be saved
+    Second and third parameter defines directories where future input and output of network should be saved.
+    Third parameter is a flag that indicates if there is a generation of test part of the dataset.
     """
+    tiles_names = copy.deepcopy(TILES_NAMES)
+    if test_gen:
+        tiles_names = [MOON_TILE_TO_GENERATE_TEST_NAME]
+    else:
+        tiles_names.remove(MOON_TILE_TO_GENERATE_TEST_NAME)
     # How many samples create per tile
-    no_samples_per_tile = int(no_samples / len(TILES_NAMES))
-    # Iteration through created CSV files
-    for index, tile in enumerate(TILES_NAMES):
+    no_samples_per_tile = int(no_samples / len(tiles_names))
+    for index, tile in enumerate(tiles_names):
         # Info which tile is during processing
         print(f"Processing tile no.{index + 1}: {tile}")
-        key = CSV_TILES_KEYS[index]
+        key = CSV_TILES_KEYS[TILES_NAMES.index(tile)]
         # Create base name for sample
         file_name = "0" * len(str(no_samples_per_tile))
         # Feeding Sample creator with parameters
-        sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * MOON_SCALE_PX, MAX_CROP_AREA_SIZE_KM * MOON_SCALE_PX, SAMPLE_RESOLUTION,
-                           MOON_SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
+        sC = SampleCreator(MIN_CROP_AREA_SIZE_KM * MOON_SCALE_PX, MAX_CROP_AREA_SIZE_KM * MOON_SCALE_PX,
+                           SAMPLE_RESOLUTION, MOON_SCALE_KM, os.path.join(CONST_PATH['wacORG'], tile),
                            f"{CONST_PATH['wacMASK']}\\MASK_{CSV_TILES_NAMES[key]}.jpg")
         # Create file names
         file_names = [
