@@ -49,18 +49,21 @@ class Decoder(nn.Module):
     Decoder module representing application of:
         - Transposed Conv 2×2
         - Concatenation
+        - Dropout
         - Double convolution 2 × (Conv 3×3 → Batch Normalization → ReLU)
     """
 
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, dropout_p):
         super(Decoder, self).__init__()
 
         self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2, bias=False)
+        self.drop = nn.Dropout(p=dropout_p)
         self.conv = DoubleConv(in_channels, out_channels)
 
     def forward(self, x, e):
         x = self.up(x)
         x = torch.cat([e, x], dim=1)
+        x = self.drop(x)
         x = self.conv(x)
 
         return x
@@ -133,7 +136,7 @@ class AttentionUNet(nn.Module):
     Complete attention U-Net architecture module
     """
 
-    def __init__(self, in_channels=1, out_channels=1, n_filter=64):
+    def __init__(self, in_channels=1, out_channels=1, n_filter=32, dropout_p=0.15):
         super(AttentionUNet, self).__init__()
 
         n_filters = [n_filter, n_filter * 2, n_filter * 4, n_filter * 8]
@@ -148,9 +151,9 @@ class AttentionUNet(nn.Module):
         self.attention_block2 = AttentionGate(n_filters[2], n_filters[1], n_filters[2] // 2)
         self.attention_block3 = AttentionGate(n_filters[1], n_filters[0], n_filters[1] // 2)
 
-        self.decoder1 = Decoder(n_filters[3], n_filters[2])
-        self.decoder2 = Decoder(n_filters[2], n_filters[1])
-        self.decoder3 = Decoder(n_filters[1], n_filters[0])
+        self.decoder1 = Decoder(n_filters[3], n_filters[2], dropout_p)
+        self.decoder2 = Decoder(n_filters[2], n_filters[1], dropout_p)
+        self.decoder3 = Decoder(n_filters[1], n_filters[0], dropout_p)
 
         self.final_conv = FinalConv(n_filters[0], out_channels)
 

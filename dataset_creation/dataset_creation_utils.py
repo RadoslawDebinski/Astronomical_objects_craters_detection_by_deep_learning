@@ -56,7 +56,7 @@ def create_dataset(no_samples_train=0, no_samples_valid=0, no_samples_test=0, cl
         creation_module(no_samples_train, CONST_PATH['trainIN'], CONST_PATH['trainOUT'])
     if no_samples_valid:
         print("\nCREATING DATASET VALIDATION PART:\n")
-        creation_module(no_samples_valid, CONST_PATH['validIN'], CONST_PATH['validOUT'])
+        creation_module(no_samples_valid, CONST_PATH['validIN'], CONST_PATH['validOUT'], test_gen=True)
     if no_samples_test:
         print("\nCREATING DATASET TEST PART:\n")
         creation_module(no_samples_test, CONST_PATH['testIN'], CONST_PATH['testOUT'], test_gen=True)

@@ -141,24 +141,24 @@ MAX_MARS_SAMPLES_BORDER = 11160
 NET_PARAMS = {
     "in_channels":  1,
     "out_channels": 1,
-    "filters_num":  64
+    "filters_num":  32,
+    "dropout_p": 0.15
 }
 
 # Optimizer params
 OPTIM_PARAMS = {
-    "learning_rate": 0.0005,
-    "weight_decay":  10e-5
+    "learning_rate": 0.0001
 }
 
-# Scheduler params
+# Scheduler params [Optional]
 SCHED_PARAMS = {
     "t_max":   10,
-    "eta_min": 0.001
+    "eta_min": 0.00001
 }
 
 # Training params
 TRAIN_PARAMS = {
-    "num_epochs": 15,
-    "batch_size": 16,
+    "num_epochs": 35,
+    "batch_size": 8,
     "save_interval_iter": 50
 }
