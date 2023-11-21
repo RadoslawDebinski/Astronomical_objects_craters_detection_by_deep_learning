@@ -114,7 +114,7 @@ class ModelTrainer:
                 f"L: {batch_loss:.4f} <{(sum_loss / (batch_idx + 1)):.4f}> | "
                 f"P: {batch_precision:.4f} <{(sum_precision / (batch_idx + 1)):.4f}> | "
                 f"R: {batch_recall:.4f} <{(sum_recall / (batch_idx + 1)):.4f}> | "
-                f"F1: {batch_f1:.4f} <{(sum_f1 / (batch_idx + 1)):.4f}>"
+                f"F1: {batch_f1:.4f} <{(sum_f1 / (batch_idx + 1)):.4f}>\n"
             )
             print(info)
             f.write(info)
