@@ -20,6 +20,10 @@ class ModelTrainer:
         self.scheduler = None
 
     def init_train_modules(self, train_loader, valid_loader, criterion, optimizer, scheduler=None):
+        """
+        Initialize train/valid loader, criterion, optimizer and optionally scheduler
+        """
+
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.criterion = criterion
@@ -27,6 +31,10 @@ class ModelTrainer:
         self.scheduler = scheduler
 
     def init_test_modules(self, test_loader, criterion):
+        """
+        Initialize test loader and criterion
+        """
+
         self.test_loader = test_loader
         self.criterion = criterion
 
@@ -172,7 +180,7 @@ class ModelTrainer:
             train_f1 += batch_f1
 
             if batch_idx % save_interval == 0:
-                self.save_model(epoch, f'{save_path}/model_{start_time}_epoch_{epoch}.pth')
+                self.save_model(epoch, f'{save_path}/model_{start_time}_temp.pth')
                 self.save_batch_info(epoch, "train", f"{save_path}/train_info_{start_time}.txt",
                                      batch_idx, batch_size,
                                      batch_loss, batch_precision, batch_recall, batch_f1,
@@ -181,7 +189,7 @@ class ModelTrainer:
         train_loss /= len(self.train_loader)
         train_precision /= len(self.train_loader)
         train_recall /= len(self.train_loader)
-        train_f1 /= len(self.train_loader)
+        train_f1 = 2 * train_precision * train_recall / (train_precision + train_recall)
 
         if self.scheduler is not None:
             self.scheduler.step()
@@ -225,7 +233,7 @@ class ModelTrainer:
             valid_loss /= len(self.valid_loader)
             valid_precision /= len(self.valid_loader)
             valid_recall /= len(self.valid_loader)
-            valid_f1 /= len(self.valid_loader)
+            valid_f1 = 2 * valid_precision * valid_recall / (valid_precision + valid_recall)
 
             self.save_epoch_info(epoch, "valid", f"{save_path}/train_info_{start_time}.txt",
                                  valid_loss, valid_precision, valid_recall, valid_f1)
@@ -266,7 +274,7 @@ class ModelTrainer:
             test_loss /= len(self.test_loader)
             test_precision /= len(self.test_loader)
             test_recall /= len(self.test_loader)
-            test_f1 /= len(self.test_loader)
+            test_f1 = 2 * test_precision * test_recall / (test_precision + test_recall)
 
             self.save_epoch_info("-", "test", f"{save_path}/test_info_{start_time}.txt",
                                  test_loss, test_precision, test_recall, test_f1)

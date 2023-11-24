@@ -12,10 +12,10 @@ class DoubleConv(nn.Module):
         super(DoubleConv, self).__init__()
 
         self.double_conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
@@ -56,7 +56,7 @@ class Decoder(nn.Module):
     def __init__(self, in_channels, out_channels, dropout_p):
         super(Decoder, self).__init__()
 
-        self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2, bias=False)
+        self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
         self.drop = nn.Dropout(p=dropout_p)
         self.conv = DoubleConv(in_channels, out_channels)
 
@@ -81,17 +81,17 @@ class AttentionGate(nn.Module):
         self.resample_up = nn.Upsample(scale_factor=2)
 
         self.W_g = nn.Sequential(
-            nn.Conv2d(F_g, F_int, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv2d(F_g, F_int, kernel_size=1, stride=1, padding=0),
             nn.BatchNorm2d(F_int)
         )
 
         self.W_x = nn.Sequential(
-            nn.Conv2d(F_l, F_int, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv2d(F_l, F_int, kernel_size=1, stride=1, padding=0),
             nn.BatchNorm2d(F_int)
         )
 
         self.psi = nn.Sequential(
-            nn.Conv2d(F_int, 1, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv2d(F_int, 1, kernel_size=1, stride=1, padding=0),
             nn.BatchNorm2d(1)
         )
 
@@ -122,7 +122,7 @@ class FinalConv(nn.Module):
         super(FinalConv, self).__init__()
 
         self.final_conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=1),
             nn.BatchNorm2d(out_channels),
             nn.Sigmoid()
         )

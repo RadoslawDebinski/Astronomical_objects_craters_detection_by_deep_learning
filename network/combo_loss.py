@@ -7,7 +7,7 @@ class ComboLoss(nn.Module):
     Combo loss function module - a combination of modified Cross Entropy (mCE) and Dice Similarity Coefficient (DSC)
     """
 
-    def __init__(self, alpha=0.5, beta=0.5):
+    def __init__(self, alpha, beta):
         super(ComboLoss, self).__init__()
         self.alpha = alpha
         self.beta = beta

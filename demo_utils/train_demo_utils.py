@@ -10,7 +10,7 @@ from dataset_creation.image_annotation_dataset import ImageAnnotationDataset
 from network.attention_unet import AttentionUNet
 from network.combo_loss import ComboLoss
 from network.model_trainer import ModelTrainer
-from settings import CONST_PATH, NET_PARAMS, OPTIM_PARAMS, SCHED_PARAMS, TRAIN_PARAMS
+from settings import CONST_PATH, NET_PARAMS, COMBO_LOSS_PARAMS, OPTIM_PARAMS, SCHED_PARAMS, TRAIN_PARAMS
 
 
 def train_model_const(prev_model_path=None):
@@ -18,24 +18,19 @@ def train_model_const(prev_model_path=None):
     Training demonstration with constants and params from 'settings'
     """
 
-    train_in_path, train_out_path, save_model_path = (CONST_PATH["trainIN"], CONST_PATH["trainOUT"],
-                                                      CONST_PATH["model"])
-    num_epochs, batch_size, save_interval_iter = (TRAIN_PARAMS["num_epochs"], TRAIN_PARAMS["batch_size"],
-                                                  TRAIN_PARAMS["save_interval_iter"])
-    in_channels, out_channels, filters_num, dropout_p = (NET_PARAMS["in_channels"], NET_PARAMS["out_channels"],
-                                                         NET_PARAMS["filters_num"], NET_PARAMS["dropout_p"])
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AttentionUNet(in_channels, out_channels, filters_num, dropout_p)
+    model = AttentionUNet(NET_PARAMS["in_channels"], NET_PARAMS["out_channels"],
+                          NET_PARAMS["filters_num"], NET_PARAMS["dropout_p"])
 
-    train_dataset = ImageAnnotationDataset(train_in_path, train_out_path)
+    train_dataset = ImageAnnotationDataset(CONST_PATH["trainIN"], CONST_PATH["trainOUT"])
     train_loader = DataLoader(train_dataset, batch_size=TRAIN_PARAMS["batch_size"], shuffle=True)
 
     valid_dataset = ImageAnnotationDataset(CONST_PATH["validIN"], CONST_PATH["validOUT"])
     valid_loader = DataLoader(valid_dataset, batch_size=TRAIN_PARAMS["batch_size"], shuffle=False)
 
-    criterion = ComboLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=OPTIM_PARAMS["learning_rate"])
+    criterion = ComboLoss(COMBO_LOSS_PARAMS["alpha"], COMBO_LOSS_PARAMS["beta"])
+    optimizer = torch.optim.Adam(model.parameters(), lr=OPTIM_PARAMS["learning_rate"],
+                                 weight_decay=OPTIM_PARAMS["weight_decay"])
 
     # [Scheduler: last optional argument in init_train_modules() of ModelTrainer()]
     # sched = lr_scheduler.CosineAnnealingLR(optimizer, T_max=SCHED_PARAMS["t_max"], eta_min=SCHED_PARAMS["eta_min"])
@@ -48,6 +43,8 @@ def train_model_const(prev_model_path=None):
     start_epoch = trainer.load_state(prev_model_path) if prev_model_path else 0
     start_time = datetime.now().strftime('%d-%m-%Y_%H-%M-%S')
 
+    save_model_path, save_interval_iter = CONST_PATH["model"], TRAIN_PARAMS["save_interval_iter"]
+    num_epochs, batch_size  = TRAIN_PARAMS["num_epochs"], TRAIN_PARAMS["batch_size"]
     for epoch in range(start_epoch+1, num_epochs+1):
         trainer.train(epoch, start_time, batch_size, save_model_path, save_interval_iter)
         trainer.validate(epoch, start_time, batch_size, save_model_path, save_interval_iter)
@@ -66,12 +63,9 @@ def test_model_const(model_path, astro_object="moon"):
     else:
         return
 
-    batch_size, save_logs_path = TRAIN_PARAMS["batch_size"], CONST_PATH["model"]
-    in_channels, out_channels, filters_num, dropout_p = (NET_PARAMS["in_channels"], NET_PARAMS["out_channels"],
-                                                         NET_PARAMS["filters_num"], NET_PARAMS["dropout_p"])
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AttentionUNet(in_channels, out_channels, filters_num, dropout_p)
+    model = AttentionUNet(NET_PARAMS["in_channels"], NET_PARAMS["out_channels"],
+                          NET_PARAMS["filters_num"], NET_PARAMS["dropout_p"])
     model.load_state_dict(torch.load(model_path)['model_state_dict'])
     model = model.to(device)
     model.eval()
@@ -79,23 +73,21 @@ def test_model_const(model_path, astro_object="moon"):
     test_dataset = ImageAnnotationDataset(test_in_path, test_out_path)
     test_loader = DataLoader(test_dataset, batch_size=TRAIN_PARAMS["batch_size"], shuffle=True)
 
-    criterion = ComboLoss()
+    criterion = ComboLoss(COMBO_LOSS_PARAMS["alpha"], COMBO_LOSS_PARAMS["beta"])
     trainer = ModelTrainer(device, model)
     trainer.init_test_modules(test_loader, criterion)
     trainer.model = trainer.model.to(trainer.device)
 
-    trainer.test(start_time, batch_size, save_logs_path)
+    trainer.test(start_time, TRAIN_PARAMS["batch_size"], CONST_PATH["model"])
 
 def check_model_const(model_path, input_image, output_mask):
     """
     Checks trained model output mask and compares with expected mask
     """
 
-    in_channels, out_channels, filters_num, dropout_p = (NET_PARAMS["in_channels"], NET_PARAMS["out_channels"],
-                                                         NET_PARAMS["filters_num"], NET_PARAMS["dropout_p"])
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AttentionUNet(in_channels, out_channels, filters_num, dropout_p)
+    model = AttentionUNet(NET_PARAMS["in_channels"], NET_PARAMS["out_channels"],
+                          NET_PARAMS["filters_num"], NET_PARAMS["dropout_p"])
     model.load_state_dict(torch.load(model_path)['model_state_dict'])
     model = model.to(device)
     model.eval()

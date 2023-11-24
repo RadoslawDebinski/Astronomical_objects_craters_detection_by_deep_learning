@@ -171,9 +171,9 @@ def creation_module(no_samples, input_path, output_path, test_gen=False):
     """
     tiles_names = copy.deepcopy(TILES_NAMES)
     if test_gen:
-        tiles_names = [MOON_TILE_TO_GENERATE_TEST_NAME]
+        tiles_names = MOON_TILE_TO_GENERATE_TEST_NAME
     else:
-        tiles_names.remove(MOON_TILE_TO_GENERATE_TEST_NAME)
+        [tiles_names.remove(tile) for tile in MOON_TILE_TO_GENERATE_TEST_NAME]
     # How many samples create per tile
     no_samples_per_tile = int(no_samples / len(tiles_names))
     for index, tile in enumerate(tiles_names):

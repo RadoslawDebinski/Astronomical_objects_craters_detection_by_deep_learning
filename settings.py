@@ -5,33 +5,33 @@
 # Constant paths dict which is used to create folders tree of the whole project
 CONST_PATH = {
     "data":        "data",
-    "model":       "data\\model",
-    "dataset":     "data\\dataset",
+    "model":       "data/model",
+    "dataset":     "data/dataset",
 
-    "train":       "data\\dataset\\training",
-    "trainIN":     "data\\dataset\\training\\input",
-    "trainOUT":    "data\\dataset\\training\\output",
+    "train":       "data/dataset/training",
+    "trainIN":     "data/dataset/training/input",
+    "trainOUT":    "data/dataset/training/output",
 
-    "valid":       "data\\dataset\\validation",
-    "validIN":     "data\\dataset\\validation\\input",
-    "validOUT":    "data\\dataset\\validation\\output",
+    "valid":       "data/dataset/validation",
+    "validIN":     "data/dataset/validation/input",
+    "validOUT":    "data/dataset/validation/output",
 
-    "test":        "data\\dataset\\testing",
-    "testIN":      "data\\dataset\\testing\\input",
-    "testOUT":     "data\\dataset\\testing\\output",
+    "test":        "data/dataset/testing",
+    "testIN":      "data/dataset/testing/input",
+    "testOUT":     "data/dataset/testing/output",
 
-    "cata":        "data\\dataset\\catalogs",
-    "cataORG":     "data\\dataset\\catalogs\\original",
-    "cataDIV":     "data\\dataset\\catalogs\\divided",
+    "cata":        "data/dataset/catalogs",
+    "cataORG":     "data/dataset/catalogs/original",
+    "cataDIV":     "data/dataset/catalogs/divided",
 
-    "wac":         "data\\dataset\\wac",
-    "wacORG":      "data\\dataset\\wac\\original",
-    "wacMASK":     "data\\dataset\\wac\\masked",
+    "wac":         "data/dataset/wac",
+    "wacORG":      "data/dataset/wac/original",
+    "wacMASK":     "data/dataset/wac/masked",
 
-    "marsIN":      "data\\transfer_learning\\input",
-    "marsOUT":     "data\\transfer_learning\\output",
+    "marsIN":      "data/transfer_learning/input",
+    "marsOUT":     "data/transfer_learning/output",
 
-    "source":      "data\\source",
+    "source":      "data/source",
 
 }
 # Constant paths list which is used to clear dataset folders before creating the new one
@@ -124,13 +124,13 @@ SAMPLE_RESOLUTION = (256, 256)
     OTHER DATA PROCESSING PARAMETERS
 """
 
-MOON_TILE_TO_GENERATE_TEST_NAME = "WAC_GLOBAL_E300S0450_100M.tif"
+MOON_TILE_TO_GENERATE_TEST_NAME = ["WAC_GLOBAL_E300S2250_100M.tif", "WAC_GLOBAL_E300N1350_100M.tif"]
 CRATER_RIM_INTENSITY = 255
 MOON_KERNEL_SIZE = 3
 MARS_KERNEL_SIZE = 50
 MARS_MASK_RESOLUTION = (2 * 256, 2 * 256)
 MAX_MARS_PROCESSING_LONGITUDE = 60
-URL_BACKUP_COUNTER_PATH = 'transfer_learning\\connection_properties.json'
+URL_BACKUP_COUNTER_PATH = 'transfer_learning/connection_properties.json'
 MAX_MARS_SAMPLES_BORDER = 11160
 
 """
@@ -145,9 +145,16 @@ NET_PARAMS = {
     "dropout_p": 0.15
 }
 
+# Combo Loss params
+COMBO_LOSS_PARAMS = {
+    "alpha": 0.7,
+    "beta": 0.3
+}
+
 # Optimizer params
 OPTIM_PARAMS = {
-    "learning_rate": 0.0001
+    "learning_rate": 0.0005,
+    "weight_decay": 10e-5
 }
 
 # Scheduler params [Optional]

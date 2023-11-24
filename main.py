@@ -102,7 +102,7 @@ def check_model_option():
 
 if __name__ == "__main__":
     # === DEBUG ===
-    # train_model_const("data/model/model_21-11-2023_15-29-14_epoch_13_of_35.pth")
+    # train_model_const()
     # exit()
     # =============
 
