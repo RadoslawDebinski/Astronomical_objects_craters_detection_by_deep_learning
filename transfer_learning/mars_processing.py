@@ -1,6 +1,7 @@
 import contextlib
 import math
 import os
+import re
 
 import cv2
 import pandas as pd
@@ -39,7 +40,7 @@ class MarsSamples:
         self.catalogue = pd.read_csv(os.path.join(CONST_PATH["cataORG"], MARS_CATALOGUE_NAME), low_memory=False)
 
     def calc_bounds(self):
-        lat_min_limit, long_min_limit = self.file_name.split("E")[1].split("N")
+        long_min_limit, lat_min_limit = self.file_name.split("E")[1].split("N")
         self.lat_min_limit, self.long_min_limit = map(lambda x: int(x.split("_")[0]),
                                                       [lat_min_limit, long_min_limit])
         self.lat_max_limit, self.long_max_limit = map(lambda x: x + MARS_TILE_DEG_SPAN,
@@ -166,6 +167,23 @@ class MarsSamples:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    def show_generated_files(self):
+        for input_name in os.listdir(CONST_PATH["marsIN"]):
+            if input_name in os.listdir(CONST_PATH["marsOUT"]):
+                input_path = os.path.join(CONST_PATH['marsIN'], input_name)
+                output_path = os.path.join(CONST_PATH['marsOUT'], input_name)
+                print(f"Comparation of {input_path} and {output_path}")
+                self.show_example(np.array(Image.open(input_path)), np.array(Image.open(output_path)))
+            else:
+                print(f"No output file found for {input_name}")
+
+    def check_out_path(self, name):
+        lat_min_limit, long_min_limit = name.split("E")[1].split("N")
+        lat_min_limit = lat_min_limit[:-1]
+        long_min_limit = long_min_limit.replace(".zip", "")
+        r = re.compile(f"\dMurrayLab_CTX_V01_E{lat_min_limit}_N{long_min_limit}_Mosaic")
+        return bool(list(filter(r.match, os.listdir(CONST_PATH["marsIN"]))))
+
     def create_dataset(self):
         # Number of samples cannot exceed max available amount of data
         if self.no_samples >= MAX_MARS_SAMPLES_BORDER:
@@ -182,6 +200,10 @@ class MarsSamples:
         correct_downloads = dict(list(correct_downloads.items())[:no_samples])
         # Samples creation loop starts here
         for href in correct_downloads:
+            print(f'Checking if file {href} was already downloaded.')
+            if self.check_out_path(href):
+                print(f'file {href} was already downloaded. Skip.')
+                continue
             print(f'Downloading file: {href}')
             # Collect image name and data from href
             self.file_name, image_bit_stream = download_image(correct_downloads[href])
