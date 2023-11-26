@@ -142,7 +142,7 @@ NET_PARAMS = {
     "in_channels":  1,
     "out_channels": 1,
     "filters_num":  32,
-    "dropout_p": 0.15
+    "p_drop": 0.15
 }
 
 # Combo Loss params
@@ -165,7 +165,7 @@ SCHED_PARAMS = {
 
 # Training params
 TRAIN_PARAMS = {
-    "num_epochs": 35,
-    "batch_size": 8,
-    "save_interval_iter": 50
+    "num_epochs": 20,
+    "batch_size": 16,
+    "save_interval_iter": 500
 }

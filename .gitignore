@@ -11,8 +11,9 @@ venv/
 
 # Other dirs
 Arch/
-model/
-dataset/
+data/
+!data/source
+/stats_tools/
 
 # Other files
 InputData.7z
