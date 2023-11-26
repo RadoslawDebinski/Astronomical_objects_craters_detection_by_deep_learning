@@ -54,7 +54,6 @@ def create_mars_dataset_option():
     """
     print("Warning: make sure you have stable Internet connection.")
     mars_samples_choice = int(input(f"Enter how many test samples you want to generate: "))
-
     ms = MarsSamples(no_samples=mars_samples_choice)
     ms.create_dataset()
 

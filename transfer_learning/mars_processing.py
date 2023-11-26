@@ -1,4 +1,5 @@
 import contextlib
+import itertools
 import math
 import os
 import re
@@ -116,49 +117,51 @@ class MarsSamples:
             # Dilate the white areas in second_mask
             self.src_mask = cv2.dilate(self.src_mask, kernel, iterations=1)
 
-    def create_samples(self, show_examples=False):
-        # Split the image into quadrants
-        left_upper_src_img = self.src_image[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2]
-                                        
-        right_upper_src_img = self.src_image[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:]
-                                         
-        left_lower_src_img = self.src_image[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2]
-                                        
-        right_lower_src_img = self.src_image[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:]
-                                         
-        # Split the mask into quadrants
-        left_upper_src_mask = self.src_mask[:self.src_image_shape_0 // 2, :self.src_image_shape_1 // 2]
-                                         
-        right_upper_src_mask = self.src_mask[:self.src_image_shape_0 // 2, self.src_image_shape_1 // 2:]
-                                          
-        left_lower_src_mask = self.src_mask[self.src_image_shape_0 // 2:, :self.src_image_shape_1 // 2]
-                                         
-        right_lower_src_mask = self.src_mask[self.src_image_shape_0 // 2:, self.src_image_shape_1 // 2:]
-                                          
-        # Safe input samples
-        cv2.imwrite(os.path.join(CONST_PATH["marsIN"], "0" + self.file_name.replace(".tif", ".jpg")),
-                    left_upper_src_img)
-        cv2.imwrite(os.path.join(CONST_PATH["marsIN"], "1" + self.file_name.replace(".tif", ".jpg")),
-                    right_upper_src_img)
-        cv2.imwrite(os.path.join(CONST_PATH["marsIN"], "2" + self.file_name.replace(".tif", ".jpg")),
-                    left_lower_src_img)
-        cv2.imwrite(os.path.join(CONST_PATH["marsIN"], "3" + self.file_name.replace(".tif", ".jpg")),
-                    right_lower_src_img)
-        # Safe output samples
-        cv2.imwrite(os.path.join(CONST_PATH["marsOUT"], "0" + self.file_name.replace(".tif", ".jpg")),
-                    left_upper_src_mask)
-        cv2.imwrite(os.path.join(CONST_PATH["marsOUT"], "1" + self.file_name.replace(".tif", ".jpg")),
-                    right_upper_src_mask)
-        cv2.imwrite(os.path.join(CONST_PATH["marsOUT"], "2" + self.file_name.replace(".tif", ".jpg")),
-                    left_lower_src_mask)
-        cv2.imwrite(os.path.join(CONST_PATH["marsOUT"], "3" + self.file_name.replace(".tif", ".jpg")),
-                    right_lower_src_mask)
+    @staticmethod
+    def dilate_masks():
+        # Create a kernel for dilation
+        kernel = np.ones((MARS_KERNEL_SIZE, MARS_KERNEL_SIZE), np.uint8)
+        # Load list of masks and process
+        for file_name in os.listdir(CONST_PATH["marsOUT"]):
+            file_path = os.path.join(CONST_PATH["marsOUT"], file_name)
+            mask = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
+            dilated_image = cv2.dilate(mask, kernel, iterations=1)
+            cv2.imwrite(file_path, dilated_image)
 
-        if show_examples:
-            self.show_example(left_upper_src_img, left_upper_src_mask)
-            self.show_example(right_upper_src_img, right_upper_src_mask)
-            self.show_example(left_lower_src_img, left_lower_src_mask)
-            self.show_example(right_lower_src_img, right_lower_src_mask)
+    def create_samples(self, show_examples=True):
+        # Define the number of divisions for each quadrant (4x4 = 16 parts)
+        divisions = 4
+
+        # Calculate the dimensions for each quadrant
+        quadrant_height = self.src_image_shape_0 // divisions
+        quadrant_width = self.src_image_shape_1 // divisions
+
+        for i, j in itertools.product(range(divisions), range(divisions)):
+            # Calculate coordinates for each quadrant
+            top = i * quadrant_height
+            bottom = (i + 1) * quadrant_height
+            left = j * quadrant_width
+            right = (j + 1) * quadrant_width
+
+            # Split the image into smaller parts
+            src_img = self.src_image[top:bottom, left:right]
+
+            # Split the mask into smaller parts
+            src_mask = self.src_mask[top:bottom, left:right]
+
+            # Save input samples
+            cv2.imwrite(os.path.join(CONST_PATH["marsIN"],
+                        f"{i * divisions + j}" + self.file_name.replace(".tif", ".jpg")),
+                        src_img)
+
+            # Save output samples
+            cv2.imwrite(os.path.join(CONST_PATH["marsOUT"],
+                        f"{i * divisions + j}" + self.file_name.replace(".tif", ".jpg")),
+                        src_mask)
+
+            # if show_examples:
+            #     print(f"{i * divisions + j}" + self.file_name.replace(".tif", ".jpg"))
+            #     self.show_example(src_img, src_mask)
 
     @staticmethod
     def show_example(resized_input_image, resized_mask_image):
@@ -190,8 +193,8 @@ class MarsSamples:
             return print(f"Number of samples: {self.no_samples} is above "
                          f"the limit of: {MAX_MARS_SAMPLES_BORDER} samples.")
 
-        # Every imported image will be split to 4 independent samples
-        no_samples = int(self.no_samples / 4)
+        # Every imported image will be split to 16 independent samples
+        no_samples = int(self.no_samples / 16)
         # Gathering list of .zip files available on MURRAY_LAB_URL
         available_downloads = get_zip_list_url(MURRAY_LAB_URL)
         # Sorting that list of .zip files via longitude
@@ -214,4 +217,3 @@ class MarsSamples:
             self.calc_bounds()
             self.create_mask()
             self.create_samples()
-
