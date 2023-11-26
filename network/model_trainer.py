@@ -58,6 +58,7 @@ class ModelTrainer:
 
         torch.save({
             'epoch': epoch,
+            'model': self.model,
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'scheduler_state_dict': self.scheduler.state_dict() if self.scheduler is not None else {},
