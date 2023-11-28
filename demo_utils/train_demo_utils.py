@@ -2,7 +2,7 @@ import os
 import torch
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, ToTensor
+from torchvision.transforms import Compose, ToTensor, Grayscale, Resize
 import numpy as np
 import cv2
 from PIL import Image
@@ -13,7 +13,8 @@ from dataset_creation.image_annotation_dataset import ImageAnnotationDataset
 from network.attention_unet import AttentionUNet
 from network.combo_loss import ComboLoss
 from network.model_trainer import ModelTrainer
-from settings import CONST_PATH, NET_PARAMS, COMBO_LOSS_PARAMS, OPTIM_PARAMS, SCHED_PARAMS, TRAIN_PARAMS
+from settings import (CONST_PATH, NET_PARAMS, COMBO_LOSS_PARAMS, OPTIM_PARAMS, SCHED_PARAMS, TRAIN_PARAMS,
+                      SAMPLE_RESOLUTION)
 
 
 def train_model_const(prev_model_path=None):
@@ -98,7 +99,7 @@ def check_model_const(model_path, input_image, output_mask, show=True, short_pri
     original = Image.open(input_image)
     expected = Image.open(output_mask)
 
-    transform = Compose([ToTensor()])
+    transform = Compose([Resize(SAMPLE_RESOLUTION), Grayscale(), ToTensor()])
     original = transform(original).unsqueeze(0).to(device)
     expected = transform(expected).unsqueeze(0).to(device)
 
@@ -153,16 +154,16 @@ def check_model_const(model_path, input_image, output_mask, show=True, short_pri
 
     # Plotting
 
-    titles = ['a)', 'b)', 'c)', 'd)'] if short_print else ['Original', 'Expected', 'Predicted', 'Comparing']
+    titles = ['(a)', '(b)', '(c)', '(d)'] if short_print else ['Original', 'Expected', 'Predicted', 'Comparing']
     fig, axs = plt.subplots(1, 4, figsize=(15, 4))
     axs[0].imshow(original_data, cmap='gray')
-    axs[0].title.set_text(titles[0])
+    axs[0].set_title(titles[0], weight='bold')
     axs[1].imshow(expected_data, cmap='gray')
-    axs[1].title.set_text(titles[1])
+    axs[1].set_title(titles[1], weight='bold')
     axs[2].imshow(predicted_data, cmap='gray')
-    axs[2].title.set_text(titles[2])
+    axs[2].set_title(titles[2], weight='bold')
     axs[3].imshow(original_data_masked)
-    axs[3].title.set_text(titles[3])
+    axs[3].set_title(titles[3], weight='bold')
 
     plt.subplots_adjust(wspace=0.5)
     for ax in axs:

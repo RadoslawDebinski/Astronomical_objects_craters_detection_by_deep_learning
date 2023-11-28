@@ -1,14 +1,18 @@
 from dataset_creation.dataset_creation_utils import prep_src_data, create_dataset
 from demo_utils.train_demo_utils import train_model_const, check_model_const, test_model_const
 from transfer_learning.mars_processing import MarsSamples
-from settings import CONST_PATH, INPUT_ZIP_NAME
+from settings import CONST_PATH, INPUT_ZIP_NAME, EXAMPLE_AU_NET_F32_MODEL, EXAMPLE_INPUTS, EXAMPLE_MASKS
 
-def display_info_option():
+
+def check_example_model_option():
     """
-    Display information about the entire project.
-    TODO: add abstract from engineering thesis
+    Check pretrained model F=32 and show results on example samples
     """
-    print("<<< Astronomical objects craters detection by deep learning >>>")
+    model_path = f"{CONST_PATH['example']}/{EXAMPLE_AU_NET_F32_MODEL}"
+    input_images_path = [f"{CONST_PATH['example']}/{example_input}" for example_input in EXAMPLE_INPUTS]
+    output_images_path = [f"{CONST_PATH['example']}/{example_output}" for example_output in EXAMPLE_MASKS]
+    for i in range(len(input_images_path)):
+        check_model_const(model_path, input_images_path[i], output_images_path[i])
 
 def create_moon_dataset_option():
     """
@@ -92,9 +96,9 @@ def check_model_option():
     """
     Train Attention U-Net model using constants from 'settings.py'
     """
-    model_path_choice = input(f"Enter the path to Attention U-Net trained in this project: ")
-    input_image_choice = input(f"Enter the path to original sample 256x256 (e.g. from test set): ")
-    output_image_choice = input(f"Enter the path to expected mask 256x256 (e.g. from test set): ")
+    model_path_choice = input(f"Enter the path to Attention U-Net model trained in this project: ")
+    input_image_choice = input(f"Enter the path to original sample (e.g. from test set): ")
+    output_image_choice = input(f"Enter the path to expected mask (e.g. from test set): ")
 
     check_model_const(model_path_choice, input_image_choice, output_image_choice)
 
@@ -106,22 +110,24 @@ if __name__ == "__main__":
     # =============
 
     print("Craters detection on Moon using Attention U-Net along with transfer learning on Mars data.")
+    print("More information (e.g. theory) you can find in engineering thesis: "
+          "'Astronomical objects craters detection by deep learning'.")
     print("Authors: Radosław Dębiński, Tomash Mikulevich.")
     while True:
         print("=" * 60)
         print("Please choose an operation:")
-        print("0. Display additional information")
+        print("0. [Examples] Show results of pretrained model (32 filters) on example samples of Moon and Mars.")
         print("1. Generate Moon dataset: train, validation and test set.")
         print("2. Create Mars dataset: test set for transfer learning.")
         print("3. Train demo model from scratch.")
-        print("4. Test your model with Moon test set.")
-        print("5. Test your model with Mars test set.")
-        print("6. Check your model with one sample and plot comparison.")
-        print("7. [Exit]")
+        print("4. Test model with Moon test set.")
+        print("5. Test model with Mars test set.")
+        print("6. Check model with one sample and plot comparison.")
+        print("7. Exit")
 
         choice = input("Your choice: ")
         if choice == "0":
-            display_info_option()
+            check_example_model_option()
         elif choice == "1":
             create_moon_dataset_option()
         elif choice == "2":

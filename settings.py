@@ -32,7 +32,7 @@ CONST_PATH = {
     "marsOUT":     "data/transfer_learning/output",
 
     "source":      "data/source",
-
+    "example":     "data/example"
 }
 # Constant paths list which is used to clear dataset folders before creating the new one
 CONST_PATH_CLEAR = [
@@ -169,3 +169,13 @@ TRAIN_PARAMS = {
     "batch_size": 16,
     "save_interval_iter": 500
 }
+
+"""
+    EXAMPLE MODEL AND SAMPLES
+"""
+
+EXAMPLE_AU_NET_F32_MODEL = "au-net_model_F32.pth"
+EXAMPLE_INPUTS = ["moon_original_sample_1.png", "moon_original_sample_2.png",
+                  "mars_original_sample_1.png", "mars_original_sample_2.png"]
+EXAMPLE_MASKS = ["moon_original_mask_1.png", "moon_original_mask_2.png",
+                 "mars_original_mask_1.png", "mars_original_mask_2.png"]

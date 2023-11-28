@@ -11,8 +11,9 @@ venv/
 
 # Other dirs
 Arch/
-data/
-!data/source
+dataset/
+model/
+transfer_learning/
 /stats_tools/
 
 # Other files
