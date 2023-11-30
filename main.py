@@ -67,7 +67,7 @@ def train_model_option():
     """
     print("Warning: make sure you have generated Moon train and validating dataset "
           "and have parameters of the network in settings.py.")
-    print("Start training process...")
+    input("Press Enter to start training process...")
     train_model_const()
 
 def test_model_moon_option():
@@ -116,31 +116,31 @@ if __name__ == "__main__":
     while True:
         print("=" * 60)
         print("Please choose an operation:")
-        print("0. [Examples] Show results of pretrained model (32 filters) on example samples of Moon and Mars.")
-        print("1. Generate Moon dataset: train, validation and test set.")
-        print("2. Create Mars dataset: test set for transfer learning.")
-        print("3. Train demo model from scratch.")
-        print("4. Test model with Moon test set.")
-        print("5. Test model with Mars test set.")
-        print("6. Check model with one sample and plot comparison.")
-        print("7. Exit")
+        print("1. [Examples] Show results of pretrained model (32 filters) on example samples of Moon and Mars.")
+        print("2. Generate Moon dataset: train, validation and test set.")
+        print("3. Create Mars dataset: test set for transfer learning.")
+        print("4. Train demo model from scratch.")
+        print("5. Test model with Moon test set.")
+        print("6. Test model with Mars test set.")
+        print("7. Check model with one sample and plot comparison.")
+        print("8. Exit")
 
         choice = input("Your choice: ")
-        if choice == "0":
+        if choice == "1":
             check_example_model_option()
-        elif choice == "1":
-            create_moon_dataset_option()
         elif choice == "2":
-            create_mars_dataset_option()
+            create_moon_dataset_option()
         elif choice == "3":
-            train_model_option()
+            create_mars_dataset_option()
         elif choice == "4":
-            test_model_moon_option()
+            train_model_option()
         elif choice == "5":
-            test_model_mars_option()
+            test_model_moon_option()
         elif choice == "6":
-            check_model_option()
+            test_model_mars_option()
         elif choice == "7":
+            check_model_option()
+        elif choice == "8":
             print("Exit...")
             break
         else:

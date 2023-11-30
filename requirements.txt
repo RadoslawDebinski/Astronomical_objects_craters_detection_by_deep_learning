@@ -1,0 +1,16 @@
+beautifulsoup4==4.12.2      # MIT License
+matplotlib==3.7.2           # PSF License
+numpy==1.25.2               # BSD License
+opencv-python==4.8.0.76     # Apache Software License (Apache 2.0)
+pandas==2.0.3               # BSD License
+Pillow==9.4.0               # HPND License
+prettytable==3.9.0          # BSD License
+py7zr==0.20.6               # LGPLv2+ License
+Requests==2.31.0            # Apache Software License (Apache 2.0)
+scipy==1.11.1               # BSD License
+torchsummary==1.5.1         # MIT License
+urllib3==1.26.16            # MIT License
+
+--extra-index-url https://download.pytorch.org/whl/cu117
+torch==2.0.1+cu117          # BSD License
+torchvision==0.15.2+cu117   # BSD License
