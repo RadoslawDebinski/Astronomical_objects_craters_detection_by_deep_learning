@@ -83,7 +83,7 @@ def test_model_moon_option():
 
 def test_model_mars_option():
     """
-    Test Attention U-Net model on Mars test dataset (transfer learning) with constants from 'settings.py'
+    Test Attention U-Net model on Mars test dataset with constants from 'settings.py'
     """
     print("Warning: make sure you have generated Mars test dataset "
           "and have right parameters of the network in settings.py.")
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     # exit()
     # =============
 
-    print("Craters detection on Moon using Attention U-Net along with transfer learning on Mars data.")
+    print("Craters detection on Moon using Attention U-Net along with tests on Mars data.")
     print("More information (e.g. theory) you can find in engineering thesis: "
           "'Astronomical objects craters detection by deep learning'.")
     print("Authors: Radosław Dębiński, Tomash Mikulevich.")
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         print("Please choose an operation:")
         print("1. [Examples] Show results of pretrained model (32 filters) on example samples of Moon and Mars.")
         print("2. Generate Moon dataset: train, validation and test set.")
-        print("3. Create Mars dataset: test set for transfer learning.")
+        print("3. Create Mars dataset: test set.")
         print("4. Train demo model from scratch.")
         print("5. Test model with Moon test set.")
         print("6. Test model with Mars test set.")
