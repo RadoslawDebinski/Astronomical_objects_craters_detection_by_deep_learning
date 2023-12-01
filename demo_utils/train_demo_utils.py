@@ -154,68 +154,30 @@ def check_model_const(model_path, input_image, output_mask, show=True, short_pri
 
     # Plotting
 
-    # titles = ['(a)', '(b)', '(c)', '(d)'] if short_print else ['Original', 'Expected', 'Predicted', 'Comparing']
-    # fig, axs = plt.subplots(1, 4, figsize=(15, 4))
-    # axs[0].imshow(original_data, cmap='gray')
-    # axs[0].set_title(titles[0], weight='bold')
-    # axs[1].imshow(expected_data, cmap='gray')
-    # axs[1].set_title(titles[1], weight='bold')
-    # axs[2].imshow(predicted_data, cmap='gray')
-    # axs[2].set_title(titles[2], weight='bold')
-    # axs[3].imshow(original_data_masked)
-    # axs[3].set_title(titles[3], weight='bold')
-    #
-    # plt.subplots_adjust(wspace=0.5)
-    # for ax in axs:
-    #     ax.axis('off')
-    # fig.tight_layout()
-    #
-    # results_filename = (f"results-"
-    #                     f"F1-{str(f1).replace('.', '_')}-"
-    #                     f"P-{str(precision).replace('.', '_')}-"
-    #                     f"R-{str(recall).replace('.', '_')}-"
-    #                     f"{input_filename}.png")
-    # fig.savefig(f"{results_path}/{results_filename}", dpi=300)
-    #
-    # if show:
-    #     plt.show()
-    #
-    # plt.close(fig)
+    titles = ['(a)', '(b)', '(c)', '(d)'] if short_print else ['Original', 'Expected', 'Predicted', 'Comparing']
+    fig, axs = plt.subplots(1, 4, figsize=(15, 4))
+    axs[0].imshow(original_data, cmap='gray')
+    axs[0].set_title(titles[0], weight='bold')
+    axs[1].imshow(expected_data, cmap='gray')
+    axs[1].set_title(titles[1], weight='bold')
+    axs[2].imshow(predicted_data, cmap='gray')
+    axs[2].set_title(titles[2], weight='bold')
+    axs[3].imshow(original_data_masked)
+    axs[3].set_title(titles[3], weight='bold')
 
-    # ============================
+    plt.subplots_adjust(wspace=0.5)
+    for ax in axs:
+        ax.axis('off')
+    fig.tight_layout()
 
-    plt.figure()
-    plt.imshow(original_data, cmap='gray')
-    plt.axis('off')
-    plt.tight_layout()
-    results_filename = f"results-original_{input_filename}.png"
-    plt.savefig(f"{results_path}/{results_filename}", dpi=300, bbox_inches='tight', pad_inches=0)
-
-    plt.figure()
-    plt.imshow(expected_data, cmap='gray')
-    plt.axis('off')
-    plt.tight_layout()
-    results_filename = f"results-original_mask_{input_filename}.png"
-    plt.savefig(f"{results_path}/{results_filename}", dpi=300, bbox_inches='tight', pad_inches=0)
-
-    plt.figure()
-    plt.imshow(predicted_data, cmap='gray')
-    plt.axis('off')
-    plt.tight_layout()
-    results_filename = (f"results-predicted"
+    results_filename = (f"results-"
                         f"F1-{str(f1).replace('.', '_')}-"
                         f"P-{str(precision).replace('.', '_')}-"
                         f"R-{str(recall).replace('.', '_')}-"
                         f"{input_filename}.png")
-    plt.savefig(f"{results_path}/{results_filename}", dpi=300, bbox_inches='tight', pad_inches=0)
+    fig.savefig(f"{results_path}/{results_filename}", dpi=300)
 
-    plt.figure()
-    plt.imshow(original_data_masked, cmap='gray')
-    plt.axis('off')
-    plt.tight_layout()
-    results_filename = (f"results-original_masked"
-                        f"F1-{str(f1).replace('.', '_')}-"
-                        f"P-{str(precision).replace('.', '_')}-"
-                        f"R-{str(recall).replace('.', '_')}-"
-                        f"{input_filename}.png")
-    plt.savefig(f"{results_path}/{results_filename}", dpi=300, bbox_inches='tight', pad_inches=0)
+    if show:
+        plt.show()
+
+    plt.close(fig)
