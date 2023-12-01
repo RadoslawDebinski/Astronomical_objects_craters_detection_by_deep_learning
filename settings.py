@@ -28,8 +28,8 @@ CONST_PATH = {
     "wacORG":      "data/dataset/wac/original",
     "wacMASK":     "data/dataset/wac/masked",
 
-    "marsIN":      "data/transfer_learning/input",
-    "marsOUT":     "data/transfer_learning/output",
+    "marsIN":      "data/dataset/mars/input",
+    "marsOUT":     "data/dataset/mars/output",
 
     "source":      "data/source",
     "example":     "data/example"

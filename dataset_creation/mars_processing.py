@@ -16,7 +16,7 @@ from settings import CONST_PATH, MARS_TILE_DEG_SPAN, \
     MURRAY_LAB_URL, MAX_MARS_SAMPLES_BORDER
 
 from dataset_creation.dataset_creation_utils import dir_module
-from transfer_learning.mars_online_data_utils import get_zip_list_url, sort_tiles_longitude, \
+from dataset_creation.mars_online_data_utils import get_zip_list_url, sort_tiles_longitude, \
     download_image
 
 

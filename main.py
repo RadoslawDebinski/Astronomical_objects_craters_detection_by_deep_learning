@@ -1,6 +1,6 @@
 from dataset_creation.dataset_creation_utils import prep_src_data, create_dataset
 from demo_utils.train_demo_utils import train_model_const, check_model_const, test_model_const
-from transfer_learning.mars_processing import MarsSamples
+from dataset_creation.mars_processing import MarsSamples
 from settings import CONST_PATH, INPUT_ZIP_NAME, EXAMPLE_AU_NET_F32_MODEL, EXAMPLE_INPUTS, EXAMPLE_MASKS
 
 
