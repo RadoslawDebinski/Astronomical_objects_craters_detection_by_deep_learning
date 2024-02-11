@@ -6,7 +6,7 @@ This project is an Engineering thesis aimed at developing **a system to detect c
 
 The solution is implemented in *Python 3.9.17* using PyTorch 2.0.1 and CUDA 11.7. To run the system, clone the repo, install dependencies from `requirements.txt`, optionally change parameters in `settings.py` and execute `main.py`, which will display a menu with available options.
 
-> For additional information or to access specific references related to this project, please contact the authors: **Tomash Mikulevich** (tommikulevich@gmail.com) and/or **Radosław Dębiński** (radekdebinski00@gmail.com)
+> For additional information or to access specific references related to this project, please contact the authors: **Tomash Mikulevich** (tommikulevich@gmail.com) and/or **Radosław Dębiński** (radekdebinski00@gmail.com).
 
 ### 🗂️ Datasets
 
@@ -30,13 +30,13 @@ To effectively handle the broad range and complexity of craters, we selected the
 
 We decided to use **Combo loss** function, that combines the advantages of cross-entropy and Dice's coefficient:
 
-$$L_{Combo} = \alpha \cdot L_{mCE} - (1 - \alpha) \cdot DSC$$
+$$L_{Combo} = \alpha \cdot L_{mCE} - (1 - \alpha) \cdot DSC,$$
 
 where:
 
-$$L_{mCE} = - \frac{1}{N} \sum_{i=1}^{N} \left[ \beta \cdot y_i \ln(p_i) + (1 - \beta) \cdot \left(1 - y_i\right) \ln\left(1 - p_i\right) \right]$$
+$$L_{mCE} = - \frac{1}{N} \sum_{i=1}^{N} \left[ \beta \cdot y_i \ln(p_i) + (1 - \beta) \cdot \left(1 - y_i\right) \ln\left(1 - p_i\right) \right],$$
 
-$$DSC = \sum_{i=1}^{N} \frac{2 y_i p_i}{y_i + p_i}$$
+$$DSC = \sum_{i=1}^{N} \frac{2 y_i p_i}{y_i + p_i}.$$
 
 It allows control not only over the contribution of each component by setting $\alpha$ coefficient but also over the relative weights assigned to falsely identified and missed objects, which is managed by $\beta$ parameter. In our study, we chose $\alpha=0.7$ and $\beta=0.3$.
 
@@ -47,7 +47,7 @@ During training, we used the Adam optimizer with a learning rate of $0.0005$ and
 The following table compares the number of parameters optimized by the network (including weights) as well as performance metrics: **precision**, **recall**, and **F1-score**. As expected, increasing the number of filters led to more parameters. There was no clear trend of improvement or decline in performance metrics; however, a noticeable drop in precision starting from 16 filters and a rising trend in recall up to 32 filters were observed. Based on the F1-score, the model with 32 filters proved to be the most optimal.
 
 |Number of filters $F$|8|16|32|64|96|
-|---------|:-----:|:-----:|:-----:|:-----:|:-----:|
+|:-------:|:-----:|:-----:|:-----:|:-----:|:-----:|
 |Number of parameters|125 820|500 076|1 993 932|7 963 020|17 907 276|
 |Precision [%]|69.32|**69.84**|68.93|67.74|66.98|
 |Recall [%]|40.08|41.94|**45.79**|44.04|45.29|
@@ -59,7 +59,7 @@ Below is a graph showing how the loss function changed during training and valid
   <img src="data/_readme-img/3-Loss_F32.png?raw=true" width="600" alt="Loss plot">
 </p>
 
-Below are example network results for **Moon** photos (*red* — areas predicted correctly by the model only; *blue* — areas correct only in the target mask; *green* — areas where the model's predictions and the target overlap):
+There are example network results for **Moon** photos (*red* — areas predicted correctly by the model only; *blue* — areas correct only in the target mask; *green* — areas where the model's predictions and the target overlap):
 - The first row showcases an image with many small craters, evenly lit, where the model performs very well.
 - The second row represents a typical (average) outcome, with the model accurately predicting densely packed large craters under challenging light conditions.
 - The third row reveals the model spotting several possible craters not recorded in the catalog, demonstrating its ability to generalize but at the cost of reducing performance metrics.
